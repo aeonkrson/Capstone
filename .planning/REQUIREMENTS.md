@@ -122,13 +122,49 @@ Which phases cover which requirements. Filled in during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (not mapped yet) | — | — |
+| PRIV-01 | Phase 4 | Pending |
+| PRIV-02 | Phase 1 | Pending |
+| PRIV-03 | Phase 2 | Pending |
+| CAPT-01 | Phase 1 | Pending |
+| CAPT-02 | Phase 4 | Pending |
+| CAPT-03 | Phase 4 | Pending |
+| CAPT-04 | Phase 4 | Pending |
+| CAPT-05 | Phase 4 | Pending |
+| CAPT-06 | Phase 4 | Pending |
+| CAPT-07 | Phase 4 | Pending |
+| CAPT-08 | Phase 4 | Pending |
+| MEAS-01 | Phase 3 | Pending |
+| MEAS-02 | Phase 3 | Pending |
+| MEAS-03 | Phase 3 | Pending |
+| MEAS-04 | Phase 3 | Pending |
+| MEAS-05 | Phase 3 | Pending |
+| MEAS-06 | Phase 4 | Pending |
+| MEAS-07 | Phase 2 | Pending |
+| MEAS-08 | Phase 2 | Pending |
+| MEAS-09 | Phase 5 | Pending |
+| CAT-01 | Phase 2 | Pending |
+| CAT-02 | Phase 2 | Pending |
+| CAT-03 | Phase 2 | Pending |
+| FIT-01 | Phase 2 | Pending |
+| FIT-02 | Phase 2 | Pending |
+| FIT-03 | Phase 2 | Pending |
+| FIT-04 | Phase 2 | Pending |
+| FIT-05 | Phase 2 | Pending |
+| FIT-06 | Phase 2 | Pending |
+| PROF-01 | Phase 2 | Pending |
+| PROF-02 | Phase 2 | Pending |
+| PROF-03 | Phase 2 | Pending |
+| I18N-01 | Phase 2 | Pending |
+| I18N-02 | Phase 2 | Pending |
+| ACC-01 | Phase 5 | Pending |
+| ACC-02 | Phase 5 | Pending |
+| ACC-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 37 total
-- Mapped to phases: 0
-- Unmapped: 37 (roadmap not created yet)
+- Mapped to phases: 37
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-10-02*
-*Last updated: 2026-10-02 after initial definition*
+*Last updated: 2026-10-02 after roadmap creation*
