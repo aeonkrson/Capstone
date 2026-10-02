@@ -80,7 +80,7 @@ A shopper who picks a size gets a fit answer they can trust — because the body
 - **Data**: All body images and measurements stay on the device — no backend, no server accounts
 - **Camera**: Browser camera access needs HTTPS or localhost — affects how the app is served and demoed
 - **Scope**: Tops only, starting with one plain white T-shirt — keeps the first version narrow
-- **Accuracy**: About 2-3 cm against tape measure — this is the bar for "done", validated on team members
+- **Accuracy**: Per-measurement targets against tape (shoulder about 2.5 cm, chest about 3.5 cm plus size agreement) — this is the bar for "done", validated on team members; a blanket 2-3 cm for every measurement is not realistic for this pipeline
 - **Language**: English and Indonesian UI — existing strings are Indonesian
 
 ## Key Decisions
