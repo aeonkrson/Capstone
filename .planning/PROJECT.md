@@ -41,7 +41,7 @@ A shopper who picks a size gets a fit answer they can trust — because the body
 - [ ] Measurements are saved so later fit checks do not require a rescan
 - [ ] History of past fit checks (garment, size, verdict)
 - [ ] Interface available in English and Indonesian
-- [ ] Estimated measurements land within about 2-3 cm of tape measurements, checked on the project team's own bodies
+- [ ] Accuracy checked on the project team's own bodies against tape, per measurement: shoulder width within about 2.5 cm; chest within about 3.5 cm and judged mainly by whether the recommended size matches the tape-based size; other measurements shown as editable estimates (final numbers fixed after the first accuracy test)
 
 ### Out of Scope
 
@@ -100,6 +100,8 @@ A shopper who picks a size gets a fit answer they can trust — because the body
 | Accuracy validated on team members only, target about 2-3 cm | Practical within the capstone | — Pending |
 | No garment overlay / AR try-on in the first version | Not selected; verdict is the core value | — Pending |
 | New project name to be chosen later | "GreenWear" no longer fits | — Pending |
+| Body detection uses MediaPipe `PoseLandmarker` (pretrained, with segmentation mask); YOLO pose/seg not used | 33 landmarks incl. feet vs YOLO's 17, native browser package, Apache-2.0; YOLO would need `onnxruntime-web`, custom decoding and an AGPL-3.0 public repo | — Pending |
+| Accuracy target is per measurement, not a blanket 2-3 cm | Research: only shoulder width is likely within 2-3 cm; chest about 3-5 cm. Shoulder about 2.5 cm, chest about 3.5 cm and judged by size agreement; final numbers fixed after the first accuracy test | — Pending |
 
 ## Evolution
 
@@ -119,4 +121,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-02 after initialization*
+*Last updated: 2026-10-02 after domain research (detection model and accuracy target decided)*
