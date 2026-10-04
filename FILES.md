@@ -1,47 +1,18 @@
 # Project File Documentation
 
-This document describes the files in the GreenWear prototype project and explains the functions of each file.
+The GreenWear prototype was removed on 2026-10 and remains in git history. This document describes the Size Fit Scanner layout.
 
-1. index.html
-   - Main entry point and layout container.
-   - Structures camera viewport, target design brackets, and control HUD.
-   - Defines dashboard segments for clothing catalog and carbon indicators.
-   - Holds structural wrapper for saved wardrobe history list.
-
-2. css/style.css
-   - Sets general layouts, flex variables, and viewport limits.
-   - Styles camera overlays, tracking indicators, and scanning banners.
-   - Configures animated circular stats rings for savings metrics.
-   - Formats product cards, history list drawers, and ownership badges.
-
-3. js/products.js
-   - Functions as the local mock product database.
-   - Stores name, category, fiber description, and asset paths.
-   - Maintains water savings percentages and carbon footprint metrics.
-   - Maps category match rules, color tags, and color names.
-
-4. js/api.js
-   - Simulates backend database connection behavior.
-   - Provides product lookup with a 1 second async delay.
-   - Houses matching rules for category and color compatibility.
-   - Returns suggested matching garment with ownership states.
-
-5. js/ar.js
-   - Drives overall prototype lifecycle logic.
-   - Coordinates camera access permissions and mirror options.
-   - Controls simulated 2.2 second scan delays before loading data.
-   - Automatically populates HTML cards, dashboard specs, and lists.
-   - Runs MediaPipe Pose tracker to draw overlay clothes on coordinates.
-   - Saves successfully scanned items to localStorage history list.
-
-6. js/main.js
-   - Idle placeholder file for future setup.
-
-7. FILES.md
-   - Lists and explains codebase files and directories.
-
-8. GreenWear.pdf
-   - Implementation plan guide detailing schedule, flows, and database designs.
-
-9. .gitignore
-   - Prevents temporary system files from being tracked by git.
+- `index.html` - page shell with a strict Content-Security-Policy and no third-party scripts.
+- `css/style.css` - styles for the shell, camera panel and HUD.
+- `src/main.js` - entry module loaded by the page.
+- `src/core/` - pure measurement and fit logic, no browser globals, testable in Node.
+- `src/platform/` - adapters for camera, pose detection and the frame loop.
+- `src/app/` - orchestration between platform adapters and core logic.
+- `src/ui/` - DOM and canvas rendering.
+- `src/data/` - static data such as garment size charts.
+- `src/i18n/` - English and Indonesian string dictionaries.
+- `vendor/mediapipe/` - self-hosted, version-pinned body detection files and their hashes.
+- `scripts/` - maintenance scripts, for example vendoring the detection files.
+- `test/` - Node built-in test runner tests.
+- `validation/` - tape-measure study protocol, pass criteria and readings.
+- `.planning/` - project planning notes (not served by the dev server).

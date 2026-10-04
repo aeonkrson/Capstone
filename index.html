@@ -1,192 +1,24 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GreenWear — Virtual Fitting Room & Mode Berkelanjutan</title>
+  <title>Size Fit Scanner</title>
+  <!-- Only same-origin resources; WebAssembly compilation is allowed for body detection -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="css/style.css">
-  
-  <!-- MediaPipe Pose CDN Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
   <!-- Header Nav -->
   <header>
     <nav class="nav-container">
-      <a href="index.html" class="logo">GreenWear</a>
+      <span class="logo">Size Fit Scanner</span>
     </nav>
   </header>
 
   <!-- Main Content -->
-  <main>
-    <div class="workspace-grid">
-      
-      <!-- Left Panel: Webcam AR Feed -->
-      <section class="camera-panel" id="camera-viewport">
-        <!-- Corner target designators -->
-        <div class="camera-bracket bracket-tl"></div>
-        <div class="camera-bracket bracket-tr"></div>
-        <div class="camera-bracket bracket-bl"></div>
-        <div class="camera-bracket bracket-br"></div>
+  <main id="app"></main>
 
-        <!-- Video Wrapper for rendering WebAR -->
-        <div class="video-wrapper">
-          <video id="webcam" autoplay playsinline></video>
-          <canvas id="ar-canvas"></canvas>
-        </div>
-
-        <!-- Scan feedback banner (Flowchart Step 5a) -->
-        <div class="scan-feedback-banner" id="scan-feedback-banner">
-          Tag tidak terdeteksi. Posisikan tubuh di depan kamera.
-        </div>
-
-        <!-- HUD controls overlay -->
-        <div class="camera-hud" id="camera-hud" style="display: none;">
-          <div class="hud-status" id="tracking-status-badge">Menunggu Model...</div>
-          <div class="hud-controls">
-            <button class="hud-btn" id="btn-toggle-skeleton" title="Tampilkan Sensor Body (Skeleton)">🦴</button>
-            <button class="hud-btn" id="btn-mirror" title="Balik Kamera">🔄</button>
-          </div>
-        </div>
-
-        <!-- Initial Disabled Camera Cover -->
-        <div class="camera-disabled-cover" id="camera-disabled-cover">
-          <div class="cover-icon">📷</div>
-          <h3>Kamera AR Nonaktif</h3>
-          <p>Aktifkan kamera untuk memindai tag pakaian secara real-time, atau lewati untuk langsung melihat informasi produk dan rekomendasi.</p>
-          <div class="cover-actions">
-            <button class="btn btn-primary" id="btn-start-camera">Aktifkan Kamera AR</button>
-            <button class="btn btn-secondary" id="btn-skip-camera">Lewati ke Detail Produk</button>
-          </div>
-        </div>
-
-        <!-- Loading Screen -->
-        <div class="camera-loading" id="loading-overlay" style="display: none;">
-          <div class="spinner"></div>
-          <h3>Mengunduh Detektor AR...</h3>
-          <p>MediaPipe Pose sedang diinisialisasi</p>
-        </div>
-
-        <!-- Fallback Webcam Denied Box -->
-        <div class="camera-fallback" id="webcam-fallback-ui" style="display: none;">
-          <div class="fallback-icon">⚠️</div>
-          <h3>Akses Kamera Ditolak</h3>
-          <p>Izin kamera diblokir. Harap aktifkan izin kamera atau gunakan tombol lewati untuk melihat data produk.</p>
-          <div class="cover-actions">
-            <button class="btn btn-primary" id="btn-retry-webcam">Coba Lagi</button>
-            <button class="btn btn-secondary" id="btn-skip-camera-fallback">Lewati ke Detail Produk</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Right Panel: Catalog Selection & Eco Dashboard -->
-      <section class="dashboard-panel">
-        
-        <!-- Catalog Picker -->
-        <div class="catalog-drawer" id="catalog-drawer" style="display: none;">
-          <h3>Pilih Pakaian</h3>
-          <div class="garment-grid" id="garment-selector-grid">
-            <!-- Dynamically populated from products.js -->
-          </div>
-        </div>
-
-        <!-- Scan History / My Wardrobe -->
-        <div class="catalog-drawer" id="wardrobe-drawer" style="display: none;">
-          <div class="wardrobe-header">
-            <h3>Lemari Saya (Scanned)</h3>
-            <button class="btn btn-secondary" id="btn-clear-history" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">Hapus Riwayat</button>
-          </div>
-          <div class="garment-grid" id="wardrobe-history-grid">
-            <!-- Dynamically populated from localStorage -->
-          </div>
-          <div class="empty-wardrobe-msg" id="empty-wardrobe-msg" style="font-size: 0.8rem; color: #888888; text-align: center; margin-top: 0.5rem;">Belum ada pakaian yang dipindai.</div>
-        </div>
-
-        <!-- Sustainability Stats Dashboard -->
-        <div class="dashboard-card" id="dashboard-details" style="display: none;">
-          <div class="dashboard-title-group">
-            <span id="eco-category">Top</span>
-            <h2 id="eco-name">Memuat Produk...</h2>
-          </div>
-
-          <!-- Meters -->
-          <div class="stats-row">
-            <div class="stat-item">
-              <div class="stat-circle">
-                <svg>
-                  <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
-                  <circle class="circle-fill" id="water-fill" cx="50" cy="50" r="40"></circle>
-                </svg>
-                <div class="stat-circle-value" id="water-percent">0%</div>
-              </div>
-              <div class="stat-label">Hemat Air</div>
-              <div class="stat-desc" id="water-saved-desc">0 Liter</div>
-            </div>
-
-            <div class="stat-item">
-              <div class="stat-circle">
-                <svg>
-                  <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
-                  <circle class="circle-fill" id="carbon-fill" cx="50" cy="50" r="40"></circle>
-                </svg>
-                <div class="stat-circle-value" id="carbon-percent">0%</div>
-              </div>
-              <div class="stat-label">Jejak Karbon</div>
-              <div class="stat-desc" id="carbon-saved-desc">0 kg CO₂</div>
-            </div>
-          </div>
-
-          <!-- Description and Specs -->
-          <div class="details-list">
-            <div class="details-row">
-              <span class="details-label">Deskripsi Serat</span>
-              <span class="details-value" id="eco-description">-</span>
-            </div>
-            <div class="details-row">
-              <span class="details-label">Komposisi Kain</span>
-              <span class="details-value" id="eco-material">-</span>
-            </div>
-            <div class="details-row">
-              <span class="details-label">Peringkat Ekologis</span>
-              <span class="details-value badge-rating" id="eco-rating">-</span>
-            </div>
-            <div class="details-row" style="margin-bottom: 1.5rem;">
-              <span class="details-label">Panduan Perawatan</span>
-              <span class="details-value" id="eco-care">-</span>
-            </div>
-          </div>
-
-          <!-- Mix & Match Recommendation Panel -->
-          <div class="mix-match-section">
-            <h3>Rekomendasi Outfit (Mix & Match)</h3>
-            <div class="mix-match-card">
-              <span class="mix-match-icon" id="mix-icon">👖</span>
-              <div class="mix-match-info" style="width: 100%;">
-                <div class="mix-match-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-                  <h4 id="mix-name" style="margin: 0;">Memuat Rekomendasi...</h4>
-                  <span class="badge-ownership" id="mix-ownership-badge">Catalog Suggestion</span>
-                </div>
-                <p id="mix-material" style="margin: 0.25rem 0;">-</p>
-                <span class="mix-category" id="mix-category">Bottom</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </section>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2026 GreenWear. Platform Virtual Fitting Room & Mode Berkelanjutan.</p>
-  </footer>
-
-  <!-- Scripts -->
-  <script src="js/products.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/ar.js"></script>
 </body>
 </html>
