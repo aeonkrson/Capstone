@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A tape-measure protocol and measurement definitions sheet exist, with per-measurement pass criteria written down before any data is collected, and the first 2-3 team members have been measured and logged.
   5. A recorded go/no-go decision fixes the measurement set (including whether waist stays), the model variant and the accuracy targets. The ColourBox size chart has been requested or collected.
 
-**Plans:** 5/8 plans executed
+**Plans:** 6/8 plans executed
 
 Plans:
 **Wave 1**
@@ -56,7 +56,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 01-06-PLAN.md — Shoulder and bust readings in cm (bust at the widest torso row in a frozen band), live and from an abortable front and side capture (wave 4)
+- [x] 01-06-PLAN.md — Shoulder and bust readings in cm (bust at the widest torso row in a frozen band), live and from an abortable front and side capture (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -140,7 +140,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Accuracy Spike | 5/8 | In Progress|  |
+| 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
 | 2. Manual-Entry Fit Check | 0/TBD | Not started | - |
 | 3. Measurement Engine | 0/TBD | Not started | - |
 | 4. Live AR Guided Capture | 0/TBD | Not started | - |
