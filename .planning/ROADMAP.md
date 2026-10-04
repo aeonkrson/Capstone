@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A tape-measure protocol and measurement definitions sheet exist, with per-measurement pass criteria written down before any data is collected, and the first 2-3 team members have been measured and logged.
   5. A recorded go/no-go decision fixes the measurement set (including whether waist stays), the model variant and the accuracy targets. The ColourBox size chart has been requested or collected.
 
-**Plans:** 2/8 plans executed
+**Plans:** 3/8 plans executed
 
 Plans:
 **Wave 1**
@@ -47,7 +47,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-03-PLAN.md — Height entry in English and Indonesian with validation, plus the acceptance and privacy guard tests (wave 2)
+- [x] 01-03-PLAN.md — Height entry in English and Indonesian with validation, plus the acceptance and privacy guard tests (wave 2)
 - [ ] 01-04-PLAN.md — ColourBox charts as data, the tape-to-size rule, and the validation kit written before any data (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -140,7 +140,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Accuracy Spike | 2/8 | In Progress|  |
+| 1. Foundation and Accuracy Spike | 3/8 | In Progress|  |
 | 2. Manual-Entry Fit Check | 0/TBD | Not started | - |
 | 3. Measurement Engine | 0/TBD | Not started | - |
 | 4. Live AR Guided Capture | 0/TBD | Not started | - |

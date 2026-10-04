@@ -15,7 +15,7 @@ Requirements for the first release. Each maps to roadmap phases.
 
 ### Capture
 
-- [ ] **CAPT-01**: User can enter their height in cm before scanning, with validation of unrealistic values
+- [x] **CAPT-01**: User can enter their height in cm before scanning, with validation of unrealistic values
 - [ ] **CAPT-02**: User sees a live camera view with a pose guide overlay showing how to stand for the front view and for the side view
 - [ ] **CAPT-03**: User gets live plain-language hints when capture conditions are wrong (full body not in frame, too close or too far, arms against body, wrong side facing, moving)
 - [ ] **CAPT-04**: User's front view locks automatically, with no button press, once they stand correctly and still
@@ -125,7 +125,7 @@ Which phases cover which requirements. Filled in during roadmap creation.
 | PRIV-01 | Phase 4 | Pending |
 | PRIV-02 | Phase 1 | Complete |
 | PRIV-03 | Phase 2 | Pending |
-| CAPT-01 | Phase 1 | Pending |
+| CAPT-01 | Phase 1 | Complete |
 | CAPT-02 | Phase 4 | Pending |
 | CAPT-03 | Phase 4 | Pending |
 | CAPT-04 | Phase 4 | Pending |
