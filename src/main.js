@@ -1,9 +1,11 @@
 import { initLocale, t, applyTranslations, formatNumber } from "./i18n/index.js";
 import { createHeightForm } from "./ui/heightForm.js";
 import { createCamera } from "./platform/camera.js";
-import { createFrameLoop } from "./platform/frameLoop.js";
+import { createFrameLoop, nextVideoFrame } from "./platform/frameLoop.js";
 import { createDebugView } from "./ui/debugView.js";
 import { createPose } from "./platform/pose.js";
+import { measureView, bustCircumferenceCm } from "./core/measure.js";
+import { runBurst, CAPTURE_DELAY_MS } from "./app/burst.js";
 
 const locale = initLocale(navigator.language);
 document.documentElement.lang = locale;
@@ -42,6 +44,12 @@ const debugSectionEl = document.getElementById("debug-section");
 const toggleSkeletonBtn = document.getElementById("btn-toggle-skeleton");
 const toggleMaskBtn = document.getElementById("btn-toggle-mask");
 const toggleMirrorBtn = document.getElementById("btn-toggle-mirror");
+const captureFrontBtn = document.getElementById("btn-capture-front");
+const captureSideBtn = document.getElementById("btn-capture-side");
+const captureResetBtn = document.getElementById("btn-capture-reset");
+const captureStatusEl = document.getElementById("capture-status");
+const debugLiveEl = document.getElementById("debug-live");
+const debugCapturedEl = document.getElementById("debug-captured");
 
 const required = [
   heightSectionEl, heightFormEl, heightInputEl, heightErrorEl,
@@ -58,7 +66,19 @@ if (required.some((el) => !el)) {
   let starting = false;
   let lastStatus = "";
 
-  const debugView = createDebugView({ canvasEl: viewCanvasEl, engineListEl: debugEngineEl, t });
+  const debugView = createDebugView({
+    canvasEl: viewCanvasEl,
+    engineListEl: debugEngineEl,
+    liveListEl: debugLiveEl,
+    capturedListEl: debugCapturedEl,
+    captureStatusEl,
+    formatNumber,
+    t,
+  });
+  // Capture results live only in this memory: numbers, no frames.
+  const captured = { front: null, side: null };
+  let captureToken = 0;
+  let capturing = false;
   debugView.setOptions({ mirror: flags.camera !== "rear" });
 
   function setStatus(text) {
@@ -100,7 +120,13 @@ if (required.some((el) => !el)) {
       const t0 = performance.now();
       const obs = pose.detect(webcamElement, timestampMs, { wantMask: flags.debug });
       const inferenceMs = performance.now() - t0;
-      debugView.render({ videoEl: webcamElement, obs });
+      let guides;
+      if (flags.debug) {
+        const reading = measureView(obs, "front", heightCm);
+        debugView.setLiveReading(reading);
+        if (reading.ok) guides = reading;
+      }
+      debugView.render({ videoEl: webcamElement, obs, guides });
       setStatus(obs ? t("camera.status.detected") : t("camera.status.searching"));
       if (flags.debug) {
         debugView.setEngineInfo({
@@ -171,11 +197,88 @@ if (required.some((el) => !el)) {
   }
 
   function stopCamera() {
+    captureToken += 1;
     frameLoop.stop();
     camera.stop();
     setStatus(t("camera.status.stopped"));
     setCameraControls(false);
   }
+
+  function refreshCaptured() {
+    const both = captured.front && captured.side;
+    debugView.setCaptured({
+      front: captured.front,
+      side: captured.side,
+      bustCm: both ? bustCircumferenceCm(captured.front.bustExtentCm.median, captured.side.bustExtentCm.median) : null,
+    });
+  }
+
+  function setCaptureButtons(enabled) {
+    if (captureFrontBtn) captureFrontBtn.disabled = !enabled;
+    if (captureSideBtn) captureSideBtn.disabled = !enabled;
+  }
+
+  const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
+  async function capture(view) {
+    if (!camera.isRunning() || capturing || !pose || heightCm === null) return;
+    capturing = true;
+    captureToken += 1;
+    const token = captureToken;
+    const heightAtStart = heightCm;
+    const isAborted = () => token !== captureToken || !camera.isRunning();
+    setCaptureButtons(false);
+    try {
+      let aborted = false;
+      for (let seconds = Math.round(CAPTURE_DELAY_MS / 1000); seconds > 0; seconds -= 1) {
+        debugView.setCaptureStatus(t("debug.capture.countdown", { seconds }));
+        await sleep(1000);
+        if (isAborted()) {
+          aborted = true;
+          break;
+        }
+      }
+      let result = { ok: false, code: "aborted", n: 0 };
+      if (!aborted) {
+        frameLoop.stop();
+        result = await runBurst({
+          pose,
+          videoEl: webcamElement,
+          view,
+          heightCm: heightAtStart,
+          nextFrame: nextVideoFrame,
+          onProgress: (done, total) => debugView.setCaptureStatus(t("debug.capture.collecting", { done, total })),
+          isAborted,
+        });
+      }
+      if (result.ok) {
+        captured[view] = result;
+        debugView.setCaptureStatus(t("debug.capture.done"));
+      } else if (result.code === "aborted") {
+        debugView.setCaptureStatus(t("debug.capture.failed", { reason: t("camera.status.stopped") }));
+      } else {
+        debugView.setCaptureStatus(t("debug.capture.failed", {
+          reason: t("debug.reading.unavailable." + (result.lastCode ?? result.code)),
+        }));
+      }
+      refreshCaptured();
+    } finally {
+      capturing = false;
+      setCaptureButtons(true);
+      if (camera.isRunning()) frameLoop.start();
+    }
+  }
+
+  function clearCaptured() {
+    captured.front = null;
+    captured.side = null;
+    debugView.setCaptureStatus("");
+    refreshCaptured();
+  }
+
+  captureFrontBtn?.addEventListener("click", () => { capture("front"); });
+  captureSideBtn?.addEventListener("click", () => { capture("side"); });
+  captureResetBtn?.addEventListener("click", clearCaptured);
 
   const heightForm = createHeightForm({
     formEl: heightFormEl,
@@ -184,6 +287,7 @@ if (required.some((el) => !el)) {
     t,
     onValid(cm) {
       heightCm = cm;
+      clearCaptured();
       heightForm.hide();
       cameraSectionEl.removeAttribute("hidden");
       heightCurrentEl.textContent = t("height.current", { cm: formatNumber(heightCm) });

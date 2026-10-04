@@ -23,3 +23,13 @@ Camera images are processed on the device and are never saved or uploaded. The b
 ## Validation
 
 Tape-measure comparison data and pass criteria live in `validation/`.
+
+## Debug view
+
+Open the address with `?debug=1`. Optional parameters: `model=heavy` (larger pose model), `camera=rear` (back camera) and `delegate=gpu` (GPU instead of CPU).
+
+The live panel shows the shoulder width, the silhouette extent at the bust level (both in cm, scaled from the height you typed), the `bust row` fraction and `cm/px`. On the picture, the dashed lines are the edges of the bust band (22% to 36% of the way from the shoulders to the hips), the solid line is the chosen bust row (the widest torso row in the band) and the other two lines are the top of the head and the soles. The `bust row` fraction goes into the `ff=` and `sf=` notes tokens.
+
+Capture front and Capture side each wait 5 seconds and then take 15 frames; the Captured panel keeps medians, a spread and a bust circumference once both views exist. Only numbers are kept, in memory, until Clear readings or a reload. Read the values off the screen into `validation/readings.csv` following `validation/PROTOCOL.md`.
+
+Readings are everyday-clothes readings with no calibration. They are not a fitted-clothing result.
