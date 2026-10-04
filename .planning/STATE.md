@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 context gathered
-last_updated: "2026-10-04T13:07:59.696Z"
+last_updated: "2026-10-04T13:08:03.704Z"
 last_activity: 2026-10-03 -- Phase 01 planning complete
 progress:
   total_phases: 5
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-02)
 ## Current Position
 
 Phase: 1 of 5 (Foundation and Accuracy Spike)
-Plan: 0 of TBD in current phase
+Plan: 1 of 8 in current phase
 Status: Ready to execute
 Last activity: 2026-10-03 -- Phase 01 planning complete
 
@@ -52,6 +52,7 @@ Progress: [█░░░░░░░░░] 13%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01 P01 | 10min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,7 @@ Recent decisions affecting current work:
 - [Roadmap]: Detection is MediaPipe PoseLandmarker (decided); capture is live AR with auto-lock and sound cues, no button or timer.
 - [Roadmap]: Accuracy is per measurement (shoulder about 2.5 cm, chest about 3.5 cm plus size agreement); final numbers fixed after the Phase 1 spike.
 - [Roadmap]: Validation data collection starts in Phase 1; the study and results table complete in Phase 5.
+- [Phase 01]: D-15 GreenWear code removed, no legacy folder; CSP forbids third-party scripts (PRIV-02)
 
 ### Pending Todos
 
