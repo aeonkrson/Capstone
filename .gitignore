@@ -2,3 +2,17 @@
 .gemini/
 .agents/
 GreenWear*.pdf
+node_modules/
+dist/
+vendor/mediapipe/models/pose_landmarker_heavy.task
+validation/private/
+*.session.json
+validation/**/*.png
+validation/**/*.jpg
+validation/**/*.jpeg
+validation/**/*.heic
+validation/**/*.webp
+validation/**/*.gif
+validation/**/*.mp4
+validation/**/*.mov
+validation/**/*.webm
