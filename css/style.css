@@ -211,6 +211,79 @@ canvas#view-canvas {
   background-color: #eeeeee;
 }
 
+/* Height form */
+.height-panel {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.form-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.form-input {
+  box-sizing: border-box;
+  width: 100%;
+  font-size: 1.25rem;
+  padding: 0.5rem;
+  border: 1px solid #999999;
+  margin-bottom: 0.5rem;
+}
+
+.form-input[aria-invalid="true"] {
+  border-color: #b00020;
+}
+
+.form-error {
+  color: #b00020;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Camera meta */
+.camera-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.privacy-note {
+  font-size: 0.8rem;
+  color: #666666;
+  margin: 0;
+}
+
+/* Debug view */
+.debug-panel {
+  margin-top: 1.5rem;
+}
+
+.debug-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.debug-readings {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 1rem;
+}
+
+.debug-readings dt,
+.debug-readings dd {
+  margin: 0;
+}
+
+.debug-note {
+  font-size: 0.8rem;
+  color: #856404;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

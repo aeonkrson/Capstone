@@ -18,7 +18,84 @@
   </header>
 
   <!-- Main Content -->
-  <main id="app"></main>
+  <main id="app">
 
+    <!-- Height entry (CAPT-01) -->
+    <section id="height-section" class="height-panel">
+      <h2 data-i18n="height.title"></h2>
+      <p data-i18n="height.intro"></p>
+      <form id="height-form" novalidate>
+        <label class="form-label" for="height-input" data-i18n="height.label"></label>
+        <input class="form-input" id="height-input" name="height" type="text" inputmode="decimal" autocomplete="off" aria-describedby="height-error" data-i18n-placeholder="height.placeholder">
+        <p class="form-error" id="height-error" role="alert" hidden></p>
+        <button class="btn btn-primary" id="btn-height-submit" type="submit" data-i18n="height.submit"></button>
+      </form>
+    </section>
+
+    <!-- Camera -->
+    <section id="camera-section" hidden>
+      <div class="camera-panel">
+        <div class="video-wrapper">
+          <video id="webcam" playsinline muted autoplay></video>
+          <canvas id="view-canvas"></canvas>
+        </div>
+
+        <!-- Detector loading -->
+        <div class="camera-loading" id="camera-loading" hidden>
+          <div class="spinner"></div>
+          <h3 data-i18n="camera.loading.title"></h3>
+          <p data-i18n="camera.loading.body"></p>
+        </div>
+
+        <!-- Camera error -->
+        <div class="camera-fallback" id="camera-error" hidden>
+          <h3 id="camera-error-title" data-i18n="camera.error.title"></h3>
+          <p id="camera-error-message"></p>
+          <div class="cover-actions">
+            <button class="btn btn-primary" id="btn-camera-retry" data-i18n="camera.retry"></button>
+          </div>
+        </div>
+
+        <!-- Camera controls -->
+        <div class="camera-hud" id="camera-hud">
+          <div class="hud-status" id="camera-status" role="status"></div>
+          <div class="hud-controls">
+            <button class="hud-btn" id="btn-camera-start" data-i18n="camera.start" hidden></button>
+            <button class="hud-btn" id="btn-camera-stop" data-i18n="camera.stop"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current height and privacy note -->
+      <div class="camera-meta" id="camera-meta">
+        <span id="height-current"></span>
+        <button class="btn btn-secondary" id="btn-change-height" data-i18n="height.change"></button>
+        <p class="privacy-note" data-i18n="camera.privacy-note"></p>
+      </div>
+    </section>
+
+    <!-- Debug view -->
+    <section id="debug-section" class="debug-panel" hidden>
+      <h2 data-i18n="debug.title"></h2>
+      <p class="debug-note" data-i18n="debug.clothing-note"></p>
+      <div class="debug-controls">
+        <button class="hud-btn" id="btn-toggle-skeleton" data-i18n="debug.toggle.skeleton"></button>
+        <button class="hud-btn" id="btn-toggle-mask" data-i18n="debug.toggle.mask"></button>
+        <button class="hud-btn" id="btn-toggle-mirror" data-i18n="debug.toggle.mirror"></button>
+        <button class="btn btn-primary" id="btn-capture-front" data-i18n="debug.capture.front"></button>
+        <button class="btn btn-primary" id="btn-capture-side" data-i18n="debug.capture.side"></button>
+        <button class="btn btn-secondary" id="btn-capture-reset" data-i18n="debug.capture.reset"></button>
+      </div>
+      <p id="capture-status" role="status"></p>
+      <h3 data-i18n="debug.live.title"></h3>
+      <dl class="debug-readings" id="debug-live"></dl>
+      <h3 data-i18n="debug.captured.title"></h3>
+      <dl class="debug-readings" id="debug-captured"></dl>
+      <dl class="debug-readings" id="debug-engine"></dl>
+    </section>
+
+  </main>
+
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
