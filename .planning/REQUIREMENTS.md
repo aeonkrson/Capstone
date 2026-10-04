@@ -10,7 +10,7 @@ Requirements for the first release. Each maps to roadmap phases.
 ### Privacy
 
 - [ ] **PRIV-01**: User sees a consent screen explaining what the camera is used for and what is saved, and must accept it before the camera starts
-- [ ] **PRIV-02**: User's camera images are processed on the device and are never saved or uploaded; only measurement values are stored
+- [x] **PRIV-02**: User's camera images are processed on the device and are never saved or uploaded; only measurement values are stored
 - [ ] **PRIV-03**: User can delete all their data (profile, measurements, history) from the device with one control
 
 ### Capture
@@ -123,7 +123,7 @@ Which phases cover which requirements. Filled in during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PRIV-01 | Phase 4 | Pending |
-| PRIV-02 | Phase 1 | Pending |
+| PRIV-02 | Phase 1 | Complete |
 | PRIV-03 | Phase 2 | Pending |
 | CAPT-01 | Phase 1 | Pending |
 | CAPT-02 | Phase 4 | Pending |
