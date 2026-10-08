@@ -74,6 +74,50 @@
       <ul id="body-sources"></ul>
     </section>
 
+    <!-- Catalog (CAT-01, CAT-02, CAT-03) -->
+    <section id="catalog-section">
+      <h2 data-i18n="catalog.title"></h2>
+      <ul id="catalog-list"></ul>
+      <div id="chart-area"></div>
+      <p id="chart-note"></p>
+    </section>
+
+    <!-- Fit check (FIT-01 to FIT-06) -->
+    <section id="fit-section" hidden>
+      <h2 data-i18n="fit.title"></h2>
+      <p id="fit-hint" data-i18n="fit.need-measurements" hidden></p>
+      <div id="fit-controls">
+        <p>
+          <label for="fit-size" data-i18n="fit.size.label"></label>
+          <select id="fit-size"></select>
+        </p>
+        <fieldset>
+          <legend data-i18n="fit.pref.legend"></legend>
+          <input type="radio" name="preference" id="pref-regular" value="regular">
+          <label for="pref-regular" data-i18n="fit.pref.regular"></label>
+          <input type="radio" name="preference" id="pref-loose" value="loose">
+          <label for="pref-loose" data-i18n="fit.pref.loose"></label>
+          <input type="radio" name="preference" id="pref-oversize" value="oversize">
+          <label for="pref-oversize" data-i18n="fit.pref.oversize"></label>
+        </fieldset>
+        <button type="button" id="btn-check-fit" data-i18n="fit.check"></button>
+      </div>
+      <div id="fit-result" hidden>
+        <p id="fit-verdict" role="status"></p>
+        <p id="fit-recommended"></p>
+        <ul id="fit-areas"></ul>
+        <h3 data-i18n="compare.title"></h3>
+        <table id="fit-compare"></table>
+      </div>
+    </section>
+
+    <!-- History (PROF-03) -->
+    <section id="history-section">
+      <h2 data-i18n="history.title"></h2>
+      <ul id="history-list"></ul>
+      <p id="history-empty" data-i18n="history.empty"></p>
+    </section>
+
     <!-- Existing height and camera scan flow -->
     <details id="scan-area">
     <summary data-i18n="scan.summary"></summary>
