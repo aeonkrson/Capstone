@@ -6,11 +6,14 @@ import { createDebugView } from "./ui/debugView.js";
 import { createPose } from "./platform/pose.js";
 import { measureView, bustCircumferenceCm } from "./core/measure.js";
 import { runBurst, CAPTURE_DELAY_MS } from "./app/burst.js";
+import * as storage from "./platform/storage.js";
+import { initFitApp } from "./app/fitApp.js";
 
-const locale = initLocale(navigator.language);
+const locale = initLocale(storage.loadLocale() ?? navigator.language);
 document.documentElement.lang = locale;
 document.title = t("app.title");
 applyTranslations(document);
+initFitApp({ doc: document, storage, t, formatNumber, applyTranslations });
 
 // Developer switches, read once at startup.
 const params = new URLSearchParams(window.location.search);
