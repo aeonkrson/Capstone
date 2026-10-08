@@ -20,6 +20,64 @@
   <!-- Main Content -->
   <main id="app">
 
+    <!-- Settings: language and delete all -->
+    <section id="settings-section">
+      <h2 data-i18n="settings.title"></h2>
+      <label for="language-select" data-i18n="settings.language"></label>
+      <select id="language-select">
+        <option value="en">English</option>
+        <option value="id">Bahasa Indonesia</option>
+      </select>
+      <button type="button" id="btn-delete-all" data-i18n="settings.delete"></button>
+      <p id="settings-status" role="status"></p>
+    </section>
+
+    <!-- Profile (PROF-01) -->
+    <section id="profile-section">
+      <h2 data-i18n="profile.title"></h2>
+      <p data-i18n="profile.intro"></p>
+      <form id="profile-form" novalidate>
+        <label for="profile-name" data-i18n="profile.name.label"></label>
+        <input id="profile-name" name="name" type="text" maxlength="40" autocomplete="off" aria-describedby="profile-error">
+        <p id="profile-error" role="alert" hidden></p>
+        <button type="submit" data-i18n="profile.name.submit"></button>
+      </form>
+      <p id="profile-current"></p>
+    </section>
+
+    <!-- Typed body measurements (MEAS-07, MEAS-08) -->
+    <section id="body-section" hidden>
+      <h2 data-i18n="body.title"></h2>
+      <p data-i18n="body.intro"></p>
+      <form id="body-form" novalidate>
+        <p>
+          <label for="body-chest" data-i18n="body.chest.label"></label>
+          <input id="body-chest" name="chest" type="text" inputmode="decimal" autocomplete="off" aria-describedby="body-chest-help body-chest-error">
+          <small id="body-chest-help" data-i18n="body.chest.help"></small>
+          <span id="body-chest-error" role="alert" hidden></span>
+        </p>
+        <p>
+          <label for="body-shoulder" data-i18n="body.shoulder.label"></label>
+          <input id="body-shoulder" name="shoulder" type="text" inputmode="decimal" autocomplete="off" aria-describedby="body-shoulder-help body-shoulder-error">
+          <small id="body-shoulder-help" data-i18n="body.shoulder.help"></small>
+          <span id="body-shoulder-error" role="alert" hidden></span>
+        </p>
+        <p>
+          <label for="body-torso" data-i18n="body.torso.label"></label>
+          <input id="body-torso" name="torso" type="text" inputmode="decimal" autocomplete="off" aria-describedby="body-torso-help body-torso-error">
+          <small id="body-torso-help" data-i18n="body.torso.help"></small>
+          <span id="body-torso-error" role="alert" hidden></span>
+        </p>
+        <button type="submit" data-i18n="body.save"></button>
+      </form>
+      <p id="body-status" role="status"></p>
+      <ul id="body-sources"></ul>
+    </section>
+
+    <!-- Existing height and camera scan flow -->
+    <details id="scan-area">
+    <summary data-i18n="scan.summary"></summary>
+
     <!-- Height entry (CAPT-01) -->
     <section id="height-section" class="height-panel">
       <h2 data-i18n="height.title"></h2>
@@ -93,6 +151,8 @@
       <dl class="debug-readings" id="debug-captured"></dl>
       <dl class="debug-readings" id="debug-engine"></dl>
     </section>
+
+    </details>
 
   </main>
 
