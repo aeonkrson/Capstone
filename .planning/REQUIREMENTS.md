@@ -32,24 +32,24 @@ Requirements for the first release. Each maps to roadmap phases.
 - [ ] **MEAS-04**: User gets an estimated torso length in cm from the scan
 - [ ] **MEAS-05**: User gets an estimated arm length in cm from the scan
 - [ ] **MEAS-06**: User sees all measurements on a review screen, each marked as scanned or edited, with the less reliable ones marked as estimates
-- [ ] **MEAS-07**: User can correct any measurement and the corrected value is used for fit checks
+- [x] **MEAS-07**: User can correct any measurement and the corrected value is used for fit checks
 - [ ] **MEAS-08**: User can skip the scan and type their measurements in by hand
 - [ ] **MEAS-09**: User can rescan to replace their saved measurements
 
 ### Catalog
 
-- [ ] **CAT-01**: User can browse a built-in catalog of ColourBox tops; the first garment is a plain white T-shirt
-- [ ] **CAT-02**: User can see each garment's size chart and its cut label (regular, loose or oversize)
+- [x] **CAT-01**: User can browse a built-in catalog of ColourBox tops; the first garment is a plain white T-shirt
+- [x] **CAT-02**: User can see each garment's size chart and its cut label (regular, loose or oversize)
 - [ ] **CAT-03**: User can pick a garment and a size to check
 
 ### Fit
 
-- [ ] **FIT-01**: User can set how they like tops to fit (regular, loose or oversize)
-- [ ] **FIT-02**: User gets a verdict on whether the chosen size fits
-- [ ] **FIT-03**: User is shown the recommended size when the chosen size does not fit
-- [ ] **FIT-04**: User sees a per-area breakdown (chest, shoulder, length) marked tight, OK or loose with the cm difference
-- [ ] **FIT-05**: User is told when the result is borderline or between two sizes instead of getting a hard yes or no
-- [ ] **FIT-06**: User can compare the recommended size for regular, loose and oversize preference side by side
+- [x] **FIT-01**: User can set how they like tops to fit (regular, loose or oversize)
+- [x] **FIT-02**: User gets a verdict on whether the chosen size fits
+- [x] **FIT-03**: User is shown the recommended size when the chosen size does not fit
+- [x] **FIT-04**: User sees a per-area breakdown (chest, shoulder, length) marked tight, OK or loose with the cm difference
+- [x] **FIT-05**: User is told when the result is borderline or between two sizes instead of getting a hard yes or no
+- [x] **FIT-06**: User can compare the recommended size for regular, loose and oversize preference side by side
 
 ### Profile
 
@@ -139,18 +139,18 @@ Which phases cover which requirements. Filled in during roadmap creation.
 | MEAS-04 | Phase 3 | Pending |
 | MEAS-05 | Phase 3 | Pending |
 | MEAS-06 | Phase 4 | Pending |
-| MEAS-07 | Phase 2 | Pending |
+| MEAS-07 | Phase 2 | Complete |
 | MEAS-08 | Phase 2 | Pending |
 | MEAS-09 | Phase 5 | Pending |
-| CAT-01 | Phase 2 | Pending |
-| CAT-02 | Phase 2 | Pending |
+| CAT-01 | Phase 2 | Complete |
+| CAT-02 | Phase 2 | Complete |
 | CAT-03 | Phase 2 | Pending |
-| FIT-01 | Phase 2 | Pending |
-| FIT-02 | Phase 2 | Pending |
-| FIT-03 | Phase 2 | Pending |
-| FIT-04 | Phase 2 | Pending |
-| FIT-05 | Phase 2 | Pending |
-| FIT-06 | Phase 2 | Pending |
+| FIT-01 | Phase 2 | Complete |
+| FIT-02 | Phase 2 | Complete |
+| FIT-03 | Phase 2 | Complete |
+| FIT-04 | Phase 2 | Complete |
+| FIT-05 | Phase 2 | Complete |
+| FIT-06 | Phase 2 | Complete |
 | PROF-01 | Phase 2 | Pending |
 | PROF-02 | Phase 2 | Pending |
 | PROF-03 | Phase 2 | Pending |
