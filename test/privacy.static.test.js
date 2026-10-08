@@ -1,5 +1,5 @@
 // PRIV-02 static guard over src/ and index.html.
-// Phase 2 will add src/platform/storage.js; allow localStorage in that one file only, then.
+// localStorage is allowed only in src/platform/storage.js; every other forbidden word applies to all files.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "src");
+
+const STORAGE_FILE = "src/platform/storage.js";
 
 function walk(dir) {
   if (!existsSync(dir)) return [];
@@ -35,10 +37,19 @@ const FORBIDDEN = [
 test("src/ uses no network, storage, export or HTML-injection API", () => {
   for (const file of walk(SRC)) {
     const code = stripComments(readFileSync(file, "utf8"));
+    const rel = path.relative(ROOT, file).split(path.sep).join("/");
     for (const word of FORBIDDEN) {
+      if (word === "localStorage" && rel === STORAGE_FILE) continue;
       assert.ok(!code.includes(word), `${path.relative(ROOT, file)} contains ${word}`);
     }
   }
+});
+
+test("localStorage appears only in src/platform/storage.js", () => {
+  const users = walk(SRC)
+    .filter((f) => stripComments(readFileSync(f, "utf8")).includes("localStorage"))
+    .map((f) => path.relative(ROOT, f).split(path.sep).join("/"));
+  assert.deepEqual(users, [STORAGE_FILE]);
 });
 
 test("src/ imports are relative only", () => {

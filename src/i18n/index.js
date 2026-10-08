@@ -1,7 +1,7 @@
 import en from "./en.js";
 import id from "./id.js";
 
-// Phase 2 adds setLocale plus storage of the user's choice here.
+// setLocale switches language at runtime; the choice is stored by src/platform/storage.js.
 export const SUPPORTED_LOCALES = ["en", "id"];
 
 const DICTIONARIES = { en, id };
@@ -18,6 +18,12 @@ export function resolveLocale(languageTag) {
 export function initLocale(languageTag) {
   activeLocale = resolveLocale(languageTag);
   return activeLocale;
+}
+
+export function setLocale(tag) {
+  if (!SUPPORTED_LOCALES.includes(tag)) return false;
+  activeLocale = tag;
+  return true;
 }
 
 export function getLocale() {

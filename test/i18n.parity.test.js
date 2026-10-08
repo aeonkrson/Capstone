@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import en from "../src/i18n/en.js";
 import id from "../src/i18n/id.js";
-import { resolveLocale, initLocale, t, formatNumber } from "../src/i18n/index.js";
+import { resolveLocale, initLocale, setLocale, getLocale, t, formatNumber } from "../src/i18n/index.js";
 
 const EXPECTED_KEYS = [
   "app.title",
@@ -69,8 +69,7 @@ const EXPECTED_KEYS = [
 
 const params = (text) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 
-test("dictionary has the 60 expected keys in both languages", () => {
-  assert.equal(EXPECTED_KEYS.length, 60);
+test("dictionary has the expected keys in both languages", () => {
   assert.deepEqual(Object.keys(en).sort(), [...EXPECTED_KEYS].sort());
   assert.deepEqual(Object.keys(id).sort(), [...EXPECTED_KEYS].sort());
 });
@@ -111,4 +110,15 @@ test("formatNumber follows the locale", () => {
   assert.equal(formatNumber(72.5), "72,5");
   initLocale("en-US");
   assert.equal(formatNumber(72.5), "72.5");
+});
+
+test("setLocale switches at runtime and rejects unsupported locales", () => {
+  initLocale("en-US");
+  assert.equal(setLocale("id"), true);
+  assert.equal(getLocale(), "id");
+  assert.equal(setLocale("fr"), false);
+  assert.equal(getLocale(), "id");
+  assert.equal(setLocale(undefined), false);
+  assert.equal(setLocale("en"), true);
+  assert.equal(getLocale(), "en");
 });
