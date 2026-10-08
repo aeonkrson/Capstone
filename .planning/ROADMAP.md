@@ -16,7 +16,7 @@ Granularity is coarse (5 phases; research suggested six, so validation and harde
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundation and Accuracy Spike** - Pinned on-device pose and silhouette running on real phones and laptops over HTTPS, with a go/no-go on the measurement set and accuracy bar
-- [ ] **Phase 2: Manual-Entry Fit Check** - Type your measurements, pick a ColourBox top and size, and get a verdict and recommended size, saved locally in English or Indonesian
+- [x] **Phase 2: Manual-Entry Fit Check** - Type your measurements, pick a ColourBox top and size, and get a verdict and recommended size, saved locally in English or Indonesian (completed 2026-10-08)
 - [ ] **Phase 3: Measurement Engine** - Turn a front and side capture plus typed height into calibrated cm measurements, with quality gates
 - [ ] **Phase 4: Live AR Guided Capture** - Consent, then a hands-free guided front and side scan that auto-locks with sound cues and ends at a measurement review
 - [ ] **Phase 5: Validation and Demo Hardening** - Team tape study, per-device accuracy results, rescan, and a demo that holds up on real devices
@@ -80,7 +80,7 @@ Plans:
   4. User can set how they like tops to fit (regular, loose or oversize) and compare the recommended size for all three preferences side by side.
   5. After closing and reopening the browser, the profile, measurements and past fit checks (garment, size, verdict, date) are still there; one control deletes all of it. The user can switch the whole interface between English and Indonesian, and the choice is remembered.
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -94,7 +94,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-04-PLAN.md — Catalog and chart view, size pick, verdict and breakdown, preference compare, history
+- [x] 02-04-PLAN.md — Catalog and chart view, size pick, verdict and breakdown, preference compare, history
 
 **UI hint**: yes
 
@@ -156,7 +156,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
-| 2. Manual-Entry Fit Check | 3/4 | In Progress|  |
+| 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
 | 3. Measurement Engine | 0/TBD | Not started | - |
 | 4. Live AR Guided Capture | 0/TBD | Not started | - |
 | 5. Validation and Demo Hardening | 0/TBD | Not started | - |
