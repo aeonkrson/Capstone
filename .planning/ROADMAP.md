@@ -80,13 +80,13 @@ Plans:
   4. User can set how they like tops to fit (regular, loose or oversize) and compare the recommended size for all three preferences side by side.
   5. After closing and reopening the browser, the profile, measurements and past fit checks (garment, size, verdict, date) are still there; one control deletes all of it. The user can switch the whole interface between English and Indonesian, and the choice is remembered.
 
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 **Wave 1**
 
 - [x] 02-01-PLAN.md — Catalog data, body-measurement validation and the pure fit engine (verdict, breakdown, recommendation, three-preference compare)
-- [ ] 02-02-PLAN.md — Profile state, the one localStorage module, setLocale and guard updates
+- [x] 02-02-PLAN.md — Profile state, the one localStorage module, setLocale and guard updates
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -156,7 +156,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
-| 2. Manual-Entry Fit Check | 1/4 | In Progress|  |
+| 2. Manual-Entry Fit Check | 2/4 | In Progress|  |
 | 3. Measurement Engine | 0/TBD | Not started | - |
 | 4. Live AR Guided Capture | 0/TBD | Not started | - |
 | 5. Validation and Demo Hardening | 0/TBD | Not started | - |

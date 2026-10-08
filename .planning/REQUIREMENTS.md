@@ -11,7 +11,7 @@ Requirements for the first release. Each maps to roadmap phases.
 
 - [ ] **PRIV-01**: User sees a consent screen explaining what the camera is used for and what is saved, and must accept it before the camera starts
 - [x] **PRIV-02**: User's camera images are processed on the device and are never saved or uploaded; only measurement values are stored
-- [ ] **PRIV-03**: User can delete all their data (profile, measurements, history) from the device with one control
+- [x] **PRIV-03**: User can delete all their data (profile, measurements, history) from the device with one control
 
 ### Capture
 
@@ -53,14 +53,14 @@ Requirements for the first release. Each maps to roadmap phases.
 
 ### Profile
 
-- [ ] **PROF-01**: User can create a local profile on the device, with no account or password
-- [ ] **PROF-02**: User's measurements are saved and reused for later fit checks without rescanning, including after the browser is closed
-- [ ] **PROF-03**: User can view a history of past fit checks (garment, size, verdict, date)
+- [x] **PROF-01**: User can create a local profile on the device, with no account or password
+- [x] **PROF-02**: User's measurements are saved and reused for later fit checks without rescanning, including after the browser is closed
+- [x] **PROF-03**: User can view a history of past fit checks (garment, size, verdict, date)
 
 ### Language
 
-- [ ] **I18N-01**: User can switch the whole interface between English and Indonesian
-- [ ] **I18N-02**: User's language choice is remembered on the device
+- [x] **I18N-01**: User can switch the whole interface between English and Indonesian
+- [x] **I18N-02**: User's language choice is remembered on the device
 
 ### Accuracy
 
@@ -124,7 +124,7 @@ Which phases cover which requirements. Filled in during roadmap creation.
 |-------------|-------|--------|
 | PRIV-01 | Phase 4 | Pending |
 | PRIV-02 | Phase 1 | Complete |
-| PRIV-03 | Phase 2 | Pending |
+| PRIV-03 | Phase 2 | Complete |
 | CAPT-01 | Phase 1 | Complete |
 | CAPT-02 | Phase 4 | Pending |
 | CAPT-03 | Phase 4 | Pending |
@@ -151,11 +151,11 @@ Which phases cover which requirements. Filled in during roadmap creation.
 | FIT-04 | Phase 2 | Complete |
 | FIT-05 | Phase 2 | Complete |
 | FIT-06 | Phase 2 | Complete |
-| PROF-01 | Phase 2 | Pending |
-| PROF-02 | Phase 2 | Pending |
-| PROF-03 | Phase 2 | Pending |
-| I18N-01 | Phase 2 | Pending |
-| I18N-02 | Phase 2 | Pending |
+| PROF-01 | Phase 2 | Complete |
+| PROF-02 | Phase 2 | Complete |
+| PROF-03 | Phase 2 | Complete |
+| I18N-01 | Phase 2 | Complete |
+| I18N-02 | Phase 2 | Complete |
 | ACC-01 | Phase 5 | Pending |
 | ACC-02 | Phase 5 | Pending |
 | ACC-03 | Phase 5 | Pending |
