@@ -111,7 +111,14 @@ Plans:
   3. Bad captures (full body not in frame, wrong distance, tilted camera, arms against the body, wrong side facing, moving) are rejected with a reason instead of producing a confident-looking number.
   4. Estimates for a team member compared with the tape protocol from Phase 1 show shoulder width and chest within the agreed starting targets, or the shortfall is recorded. Waist, torso length and arm length carry an explicit "estimate" marker for Phase 4's review screen.
 
-**Plans**: TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Pure scan engine: five measurements, waist row, calibration table (TDD, wave 1)
+- [ ] 03-02-PLAN.md — Capture-quality gates and device tilt adapter (TDD, wave 1)
+- [ ] 03-03-PLAN.md — Profile accepts scanned values with scanned/estimate markers, fitApp.applyScan (wave 1)
+- [ ] 03-04-PLAN.md — Scan page wiring: gated burst, scan session, plain result view, Use button (wave 2)
+- [ ] 03-05-PLAN.md — Team repeatability and tape check, fitted calibration, results record (wave 3, human checkpoint)
 
 ### Phase 4: Live AR Guided Capture
 
