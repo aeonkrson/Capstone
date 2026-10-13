@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { maskBBox, rowRuns, torsoRunAtRow, widestTorsoRun } from "../../src/core/mask.js";
+import { maskBBox, rowRuns, torsoRunAtRow, widestTorsoRun, narrowestTorsoRun } from "../../src/core/mask.js";
 
 function newMask(w, h) {
   return { w, h, data: new Uint8Array(w * h) };
@@ -83,4 +83,32 @@ test("arms touching the torso are included", () => {
 
 test("no run at the midline gives null", () => {
   assert.equal(widestTorsoRun(bodyMask(), 10, 40, () => 45), null);
+});
+
+test("narrowestTorsoRun picks the narrowest midline run, ties keep the highest row", () => {
+  const m = bodyMask();
+  assert.deepEqual(narrowestTorsoRun(m, 0, 40, at100), { row: 0, start: 55, end: 145, width: 90 });
+  const b = narrowestTorsoRun(m, 2, 5, at100);
+  assert.equal(b.row, 2);
+  assert.equal(b.width, 110);
+  const c = narrowestTorsoRun(m, 18.6, 24.4, at100);
+  assert.equal(c.row, 19);
+  assert.equal(c.width, 90);
+  const d = narrowestTorsoRun(m, -5, 100, at100);
+  assert.equal(d.row, 0);
+});
+
+test("narrowestTorsoRun skips rows without a midline run", () => {
+  const m = newMask(200, 20);
+  fill(m, 60, 139, 0, 19);
+  fill(m, 40, 159, 10, 19);
+  for (let x = 95; x <= 105; x++) m.data[5 * m.w + x] = 0;
+  for (let x = 0; x < 200; x++) m.data[6 * m.w + x] = 0;
+  const r = narrowestTorsoRun(m, 5, 19, at100);
+  assert.equal(r.row, 7);
+  assert.equal(r.width, 80);
+});
+
+test("narrowestTorsoRun returns null when no row has a midline run", () => {
+  assert.equal(narrowestTorsoRun(bodyMask(), 10, 40, () => 45), null);
 });
