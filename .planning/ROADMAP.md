@@ -135,7 +135,25 @@ Plans:
   5. A full scan completes in a phone browser and on a laptop webcam. If the camera is denied or unavailable, the user sees a clear message and is sent to manual measurement entry.
   6. The scan ends at a review screen showing all measurements in cm, each marked scanned or edited, with the less reliable ones marked as estimates; the user can correct any value and go straight on to a fit check.
 
-**Plans**: TBD
+**Plans:** 7 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — Pure auto-lock state machine in core: hold-still lock, turn phase, cues, hints from Phase 3 reason codes (TDD, wave 1)
+- [ ] 04-02-PLAN.md — Pure review model: scanned/edited/estimate rows, input parsing, profileState.applyReview (TDD, wave 1)
+- [ ] 04-03-PLAN.md — WebAudio sound cues (hold, captured, turn) and pose guide figure geometry (wave 1)
+- [ ] 04-05-PLAN.md — Consent, guide hint, manual-entry and review markup plus en/id strings; consent view; scan view trimmed (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-04-PLAN.md — Guided scan controller: live gate -> auto-lock -> burst capture -> cues (TDD, wave 2)
+- [ ] 04-06-PLAN.md — Review view and fitApp applyReview, goToFitCheck, showManualEntry (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-07-PLAN.md — main.js wiring: consent gating, live guide overlay, hands-free scan with sound, review, manual routing and fallback (wave 3; real-device check listed as outstanding, not a gate)
+
 **UI hint**: yes
 
 ### Phase 5: Validation and Demo Hardening
