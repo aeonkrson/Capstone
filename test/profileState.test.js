@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   emptyState, sanitiseState, setProfileName, setMeasurement, addHistoryEntry, HISTORY_LIMIT,
-  applyScan, ESTIMATE_KEYS, MEASUREMENT_KEYS,
+  applyScan, ESTIMATE_KEYS, MEASUREMENT_KEYS, applyReview,
 } from "../src/core/profileState.js";
 
 const entry = (n = 1) => ({
@@ -165,4 +165,50 @@ test("sanitiseState keeps scanned, loads old states, fixes bogus source", () => 
   assert.equal(old.measurements.waistCm, null);
   assert.equal(old.measurements.armCm, null);
   assert.equal(old.sources.chestCm, "typed");
+});
+
+const reviewScan = { shoulderCm: 42.0, chestCm: 92.0, waistCm: 80.0, torsoCm: 50.0, armCm: 58.0 };
+
+test("applyReview: unchanged values are all scanned", () => {
+  const r = applyReview(emptyState(), reviewScan, reviewScan);
+  assert.equal(r.applied.length, 5);
+  assert.deepEqual(r.rejected, []);
+  for (const key of MEASUREMENT_KEYS) assert.equal(r.state.sources[key], "scanned");
+});
+
+test("applyReview: changed chest is edited, others scanned", () => {
+  const r = applyReview(emptyState(), reviewScan, { ...reviewScan, chestCm: 95 });
+  assert.equal(r.state.measurements.chestCm, 95);
+  assert.equal(r.state.sources.chestCm, "edited");
+  assert.equal(r.state.sources.shoulderCm, "scanned");
+  assert.equal(r.applied.length, 5);
+});
+
+test("applyReview: null waist is skipped and keeps old value", () => {
+  const base = setMeasurement(emptyState(), "waistCm", 77);
+  const r = applyReview(base, reviewScan, { ...reviewScan, waistCm: null });
+  assert.ok(!r.applied.includes("waistCm"));
+  assert.ok(!r.rejected.includes("waistCm"));
+  assert.equal(r.state.measurements.waistCm, 77);
+  assert.equal(r.state.sources.waistCm, "typed");
+});
+
+test("applyReview: out-of-range torso rejected, old kept", () => {
+  const base = setMeasurement(emptyState(), "torsoCm", 48);
+  const r = applyReview(base, reviewScan, { ...reviewScan, torsoCm: 75 });
+  assert.deepEqual(r.rejected, ["torsoCm"]);
+  assert.equal(r.state.measurements.torsoCm, 48);
+});
+
+test("applyReview: no mutation, history/profile/preference preserved, sanitise round-trip", () => {
+  let base = setProfileName(emptyState(), "Jo");
+  base = addHistoryEntry(base, entry(1));
+  base = { ...base, preference: "loose" };
+  const snapshot = JSON.stringify(base);
+  const r = applyReview(base, reviewScan, { ...reviewScan, chestCm: 95 });
+  assert.equal(JSON.stringify(base), snapshot);
+  assert.deepEqual(r.state.profile, { name: "Jo" });
+  assert.equal(r.state.preference, "loose");
+  assert.equal(r.state.history.length, 1);
+  assert.deepEqual(sanitiseState(r.state), r.state);
 });
