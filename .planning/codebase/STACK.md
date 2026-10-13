@@ -1,73 +1,72 @@
 # Technology Stack
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
 
 ## Languages
-
-**Primary:**
-- JavaScript (vanilla, ES2015+ syntax, no modules, no transpilation) - all application logic in `js/ar.js`, `js/api.js`, `js/products.js`
-- HTML5 - single page `index.html` (`<html lang="id">`, UI copy is in Indonesian)
-- CSS3 - single stylesheet `css/style.css` (501 lines)
-
-**Secondary:**
-- None. `js/main.js` is a one-line comment placeholder and is not loaded by `index.html`.
+- JavaScript ES modules (`"type": "module"` in `package.json`), no TypeScript, no transpilation beyond the Vite build.
+- HTML5: one page, `index.html`. `<html lang>` is set at runtime by `initLocale` in `src/main.js`.
+- CSS3: one stylesheet, `css/style.css`. No preprocessor, no CSS custom properties.
+- Node.js scripts (`.mjs`) for tooling: `scripts/` and `validation/`.
 
 ## Runtime
+- Client-side only, in a modern phone or laptop browser. No backend, no server runtime.
+- Browser APIs used: `getUserMedia`, Canvas 2D, WebAssembly, `localStorage` (only through `src/platform/storage.js`), `requestVideoFrameCallback` (falls back to `requestAnimationFrame`), Web Audio, `DeviceOrientationEvent`.
+- Secure context required for the camera: `https://` or `http://localhost`. `src/core/preflight.js` reports `insecure-context`, `no-camera-api` and `no-webassembly` at startup; manual entry still works.
 
-**Environment:**
-- Modern desktop/mobile browser (client-side only). No Node.js, no server runtime.
-- Requires `navigator.mediaDevices.getUserMedia` (webcam), Canvas 2D, `localStorage`, `requestAnimationFrame`, and WebAssembly/WebGL (needed by MediaPipe Pose).
-- Camera access requires a secure context: `https://` or `http://localhost`. Opening `index.html` via `file://` may block camera access depending on the browser.
+## Tooling
+- Node `>=22.12.0` (`engines` in `package.json`).
+- devDependencies, exact-pinned (no `^` or `~`, guarded by `test/vendor.test.js`):
 
-**Package Manager:**
-- None. No `package.json`, no lockfile, no `node_modules`.
-- Dependencies are loaded by `<script>` tags from a CDN.
+| Package | Version | Role |
+|---------|---------|------|
+| `vite` | 8.3.2 | dev server and production build (`base: "./"`) |
+| `@vitejs/plugin-basic-ssl` | 2.3.0 | self-signed HTTPS so phones on the LAN get camera access |
+| `@mediapipe/tasks-vision` | 1.0.1 | source of the vendored pose files |
 
-## Frameworks
+- No runtime dependencies. No install-time scripts (guarded by `test/vendor.test.js`).
+- No linter, formatter or bundler config beyond `vite.config.js`.
 
-**Core:**
-- No application framework. Plain DOM manipulation (`document.getElementById`, `style.display` toggling) in `js/ar.js`.
-- MediaPipe Pose (`@mediapipe/pose`, version unpinned, latest on jsDelivr) - body landmark detection used to place garment overlay images. Instantiated in `startMediaPipe()` in `js/ar.js` with `modelComplexity: 1`, `smoothLandmarks: true`, `minDetectionConfidence: 0.5`, `minTrackingConfidence: 0.5`.
-- MediaPipe `camera_utils` (version unpinned) - loaded in `index.html` but the `Camera` helper is not used. `js/ar.js` drives frames itself with a `requestAnimationFrame` loop throttled to 30 fps that calls `poseInstance.send({ image: webcamElement })`.
+## Scripts (`package.json`)
+- `dev`: `vite --host` (HTTPS on the LAN).
+- `build`: `vite build && node scripts/copy-vendor-to-dist.mjs` (copies wasm and models into `dist/` and re-checks SHA-256).
+- `demo`: `npm run build && vite preview --host`.
+- `preview`: `vite preview --host`.
+- `test`: `node --test "test/**/*.test.js"`.
+- `vendor`: `node scripts/vendor-mediapipe.mjs` (copy from `node_modules`, download models, write hashes).
+- `vendor:check`: `node scripts/vendor-mediapipe.mjs --check` (verify `vendor/mediapipe/SHA256SUMS`).
 
-**Testing:**
-- Not detected. No test runner, test files, or test config.
+## Pose Engine
+- MediaPipe `PoseLandmarker` from `@mediapipe/tasks-vision` 1.0.1, self-hosted in `vendor/mediapipe/`.
+- `vendor/mediapipe/vision_bundle.mjs` is imported by `src/platform/pose.js` and bundled by Vite.
+- `vendor/mediapipe/wasm/` and `vendor/mediapipe/models/` are loaded at runtime from page-relative URLs (`new URL(..., document.baseURI)`).
+- `vendor/mediapipe/SHA256SUMS` lists the bundle, four wasm files and both models; `vendor:check` and the build verify them.
+- Model `pose_landmarker_full.task` by default and tracked in git; `pose_landmarker_heavy.task` is optional (`?model=heavy`), downloaded with `--heavy` and git-ignored.
+- Options: `numPoses: 1`, `outputSegmentationMasks: true`, running mode `VIDEO`, delegate `CPU` (or `GPU` by flag).
 
-**Build/Dev:**
-- None. No bundler, linter, formatter, or dev server config. Files are served as-is.
-
-## Key Dependencies
-
-**Critical:**
-- `@mediapipe/pose` via `https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js` (`index.html` line 11) - pose tracking. The app cannot do AR overlay if the CDN is unreachable.
-- Pose model and WASM files fetched at runtime via `locateFile` from `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}` (`js/ar.js` line 361).
-
-**Infrastructure:**
-- `@mediapipe/camera_utils` via `https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js` (`index.html` line 10) - loaded but unused.
-- Both CDN `<script>` tags use `crossorigin="anonymous"`. No Subresource Integrity hashes and no version pins.
+## Content Security Policy
+- Meta CSP in `index.html`: `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'`.
+- No third-party origins, no CDN, no inline scripts or styles.
 
 ## Configuration
+- No environment variables, no `.env` files (`import.meta.env` is forbidden in `src/` by `test/privacy.static.test.js`).
+- URL flags, read once in `src/main.js`:
 
-**Environment:**
-- No environment variables, no `.env` files, no runtime config files.
-- Tunable constants are hard-coded in source: MediaPipe options and 30 fps throttle in `js/ar.js`; webcam constraints (ideal 640x480, `facingMode: "user"`, `audio: false`) in `js/ar.js`; simulated latencies in `js/api.js` (1000 ms product fetch, 500 ms recommendation) and `js/ar.js` (2200 ms scan delay).
-- Product data lives in the `PRODUCTS` global array in `js/products.js`.
-- Script load order in `index.html` matters because there are no modules: `js/products.js`, then `js/api.js`, then `js/ar.js`.
+| Flag | Values | Effect |
+|------|--------|--------|
+| `debug` | `1` | shows the debug section, skeleton, mask, live readings and fps |
+| `model` | `heavy` | loads the heavy model instead of full |
+| `camera` | `rear` | rear camera (`environment`), no mirroring |
+| `delegate` | `gpu` | GPU delegate instead of CPU |
 
-**Build:**
-- None. Static assets: `css/style.css`, `assets/*.png` (`cotton_tee_card.png`, `cotton_tee_overlay.png`, `linen_shirt_card.png`, `linen_shirt_overlay.png`).
-- CSS uses a system font stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica...`). No web fonts, no CSS custom properties, one `@media (max-width: 768px)` breakpoint, `@keyframes spin` and `pulse`.
-- `.gitignore` ignores `.DS_Store`, `.gemini/`, `.agents/`.
+- Tunable constants live in pure modules: `QUALITY` in `src/core/quality.js`, `AUTO_LOCK` in `src/core/autoLock.js`, `CALIBRATION` in `src/core/calibration.js`, ease and diff windows in `src/core/fit.js`, burst sizes in `src/app/burst.js`, frame rate (`targetFps = 12`) in `src/platform/frameLoop.js`.
+- `vite.config.js`: `base: "./"`, `basicSsl()`, `server.host: true`, `server.ws: false`, `server.fs.deny` adds `**/validation/**` and `**/.planning/**`.
 
 ## Platform Requirements
-
-**Development:**
-- Any static file server (for example `python3 -m http.server` or an editor live-server) serving the project root on `localhost`. Internet access is needed to load MediaPipe from jsDelivr.
-- A webcam for the AR flow. Without one, the "skip" path (`bypassCamera()` in `js/ar.js`) still shows product data.
-
-**Production:**
-- Deployment target not detected. Any static host over HTTPS would work. No server-side component exists.
+- Development: `npm install`, then `npm run dev`; open the printed `https://<lan-ip>:5173` on the phone and accept the self-signed certificate.
+- Demo: `npm run demo` builds `dist/` and serves it with `vite preview --host` over HTTPS.
+- `dist/` also runs from any plain static server over HTTPS or localhost; all paths are relative.
+- No internet needed at runtime once installed; the model download happens only in `npm run vendor`.
 
 ---
 
-*Stack analysis: 2026-10-02*
+*Stack analysis: 2026-10-13*
