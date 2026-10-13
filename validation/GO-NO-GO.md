@@ -56,3 +56,5 @@ Added after data:
 
 ## Follow-ups for planning documents
 
+
+- Waist (D-06 never formally closed): included in Phase 3 as an estimate, marked as such in the app and not held to a tape target. Torso length and arm length are also included as estimates.

@@ -49,3 +49,13 @@ Normal breathing in both.
 ## Not measured in this phase
 
 Waist (D-06, dropped subject to the go/no-go), torso length, arm length.
+
+## Phase 3 additions
+
+The A-pose front stance for scans is defined above. Waist, torso length and arm length are estimates: they are shown and used, but marked as estimates in the app and not held to a tape target.
+
+Waist, tape: horizontal around the narrowest part of the torso between the lowest rib and the hip bone, at the end of a normal breath out, over a thin layer of clothing. Waist, scan: the narrowest midline run in the 55% to 80% band of the silhouette, converted to a circumference with the ellipse rule. Estimate.
+
+Torso length, tape: from the base of the neck (C7) straight down to the top of the hip bone at the side. Torso length, scan: distance from the shoulder midpoint to the hip midpoint. Estimate.
+
+Arm length, tape: from the shoulder tip (acromion) along the straight arm to the wrist bone. Arm length, scan: the shoulder-elbow-wrist landmark path, mean of the visible sides. Estimate.
