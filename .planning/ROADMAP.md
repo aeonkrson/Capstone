@@ -17,9 +17,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundation and Accuracy Spike** - Pinned on-device pose and silhouette running on real phones and laptops over HTTPS, with a go/no-go on the measurement set and accuracy bar
 - [x] **Phase 2: Manual-Entry Fit Check** - Type your measurements, pick a ColourBox top and size, and get a verdict and recommended size, saved locally in English or Indonesian (completed 2026-10-08)
-- [x] **Phase 3: Measurement Engine** - Turn a front and side capture plus typed height into calibrated cm measurements, with quality gates (code complete 2026-10-13; team tape accuracy session outstanding)
-- [x] **Phase 4: Live AR Guided Capture** - Consent, then a hands-free guided front and side scan that auto-locks with sound cues and ends at a measurement review (completed 2026-10-13)
-- [ ] **Phase 5: Validation and Demo Hardening** - Team tape study, per-device accuracy results, rescan, and a demo that holds up on real devices
+- [ ] **Phase 3: Measurement Engine** - Turn a front and side capture plus typed height into calibrated cm measurements, with quality gates (code complete 2026-10-13; team tape accuracy session outstanding)
+- [ ] **Phase 4: Live AR Guided Capture** - Consent, then a hands-free guided front and side scan that auto-locks with sound cues and ends at a measurement review (completed 2026-10-13)
+- [ ] **Phase 5: Validation and Demo Hardening** - Team tape study, per-device accuracy results, rescan, and a demo that holds up on real devices (completed 2026-10-13)
 
 ## Phase Details
 
@@ -170,7 +170,7 @@ Plans:
   4. A results table records error per measurement and per device (phone, laptop), with subjects identified by anonymous ID and photos kept out of the repository.
   5. The whole flow (consent, scan, review, verdict, history) has been run on a real iPhone, a real Android phone and a laptop over HTTPS, and a recorded fallback demo exists in case the venue fails.
 
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans complete
 
 Plans:
 **Wave 1**
@@ -187,7 +187,7 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 05-06-PLAN.md — Rewrite .planning/codebase docs and regenerate CLAUDE.md (GreenWear text removed)
-- [ ] 05-07-PLAN.md — README demo runbook, FILES.md, HUMAN-TODO.md, STATE.md current position
+- [x] 05-07-PLAN.md — README demo runbook, FILES.md, HUMAN-TODO.md, STATE.md current position
 **UI hint**: yes
 
 ## Progress
@@ -199,6 +199,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 |-------|----------------|--------|-----------|
 | 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
-| 3. Measurement Engine | 5/5 | Complete (tape session outstanding) | 2026-10-13 |
-| 4. Live AR Guided Capture | 7/7 | Complete   | 2026-10-13 |
-| 5. Validation and Demo Hardening | 6/7 | In Progress|  |
+| 3. Measurement Engine | 5/5 | Code complete (tape session outstanding) | 2026-10-13 |
+| 4. Live AR Guided Capture | 7/7 | Code complete (device check outstanding) | 2026-10-13 |
+| 5. Validation and Demo Hardening | 7/7 | Code complete (human sessions outstanding, see HUMAN-TODO.md) | 2026-10-13 |
