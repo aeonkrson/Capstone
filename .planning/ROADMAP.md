@@ -135,7 +135,7 @@ Plans:
   5. A full scan completes in a phone browser and on a laptop webcam. If the camera is denied or unavailable, the user sees a clear message and is sent to manual measurement entry.
   6. The scan ends at a review screen showing all measurements in cm, each marked scanned or edited, with the less reliable ones marked as estimates; the user can correct any value and go straight on to a fit check.
 
-**Plans:** 5/7 plans executed
+**Plans:** 6/7 plans executed
 
 Plans:
 **Wave 1**
@@ -148,7 +148,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 04-04-PLAN.md — Guided scan controller: live gate -> auto-lock -> burst capture -> cues (TDD, wave 2)
-- [ ] 04-06-PLAN.md — Review view and fitApp applyReview, goToFitCheck, showManualEntry (wave 2)
+- [x] 04-06-PLAN.md — Review view and fitApp applyReview, goToFitCheck, showManualEntry (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -183,5 +183,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
 | 3. Measurement Engine | 5/5 | Complete (tape session outstanding) | 2026-10-13 |
-| 4. Live AR Guided Capture | 5/7 | In Progress|  |
+| 4. Live AR Guided Capture | 6/7 | In Progress|  |
 | 5. Validation and Demo Hardening | 0/TBD | Not started | - |
