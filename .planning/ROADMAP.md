@@ -170,7 +170,7 @@ Plans:
   4. A results table records error per measurement and per device (phone, laptop), with subjects identified by anonymous ID and photos kept out of the repository.
   5. The whole flow (consent, scan, review, verdict, history) has been run on a real iPhone, a real Android phone and a laptop over HTTPS, and a recorded fallback demo exists in case the venue fails.
 
-**Plans:** 5/7 plans executed
+**Plans:** 6/7 plans executed
 
 Plans:
 **Wave 1**
@@ -186,7 +186,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 05-06-PLAN.md — Rewrite .planning/codebase docs and regenerate CLAUDE.md (GreenWear text removed)
+- [x] 05-06-PLAN.md — Rewrite .planning/codebase docs and regenerate CLAUDE.md (GreenWear text removed)
 - [ ] 05-07-PLAN.md — README demo runbook, FILES.md, HUMAN-TODO.md, STATE.md current position
 **UI hint**: yes
 
@@ -201,4 +201,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
 | 3. Measurement Engine | 5/5 | Complete (tape session outstanding) | 2026-10-13 |
 | 4. Live AR Guided Capture | 7/7 | Complete   | 2026-10-13 |
-| 5. Validation and Demo Hardening | 5/7 | In Progress|  |
+| 5. Validation and Demo Hardening | 6/7 | In Progress|  |
