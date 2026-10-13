@@ -6,6 +6,9 @@ import { createDebugView } from "./ui/debugView.js";
 import { createPose } from "./platform/pose.js";
 import { measureView, bustCircumferenceCm } from "./core/measure.js";
 import { runBurst, CAPTURE_DELAY_MS } from "./app/burst.js";
+import { createScanSession } from "./app/scanSession.js";
+import { createScanView } from "./ui/scanView.js";
+import { createTiltSensor } from "./platform/tilt.js";
 import * as storage from "./platform/storage.js";
 import { initFitApp } from "./app/fitApp.js";
 
@@ -13,7 +16,7 @@ const locale = initLocale(storage.loadLocale() ?? navigator.language);
 document.documentElement.lang = locale;
 document.title = t("app.title");
 applyTranslations(document);
-initFitApp({ doc: document, storage, t, formatNumber, applyTranslations });
+const fitApp = initFitApp({ doc: document, storage, t, formatNumber, applyTranslations });
 
 // Developer switches, read once at startup.
 const params = new URLSearchParams(window.location.search);
@@ -82,6 +85,24 @@ if (required.some((el) => !el)) {
   const captured = { front: null, side: null };
   let captureToken = 0;
   let capturing = false;
+  // Scan results shown to the user: burst summaries only, in memory.
+  const session = createScanSession();
+  const scanView = createScanView({
+    doc: document,
+    t,
+    formatNumber,
+    onUse(snapshot) {
+      scanView.showUseResult(fitApp.applyScan(snapshot.combined.measurements));
+    },
+  });
+  scanView.render(session.snapshot());
+  // Re-render the scan lines after the settings language switch (registered earlier, so it runs first).
+  document.getElementById("language-select")?.addEventListener("change", () => {
+    scanView.render(session.snapshot());
+  });
+  // Phone tilt; started on the first Capture click (iOS needs a user gesture).
+  const tilt = createTiltSensor();
+  let tiltStarted = false;
   debugView.setOptions({ mirror: flags.camera !== "rear" });
 
   function setStatus(text) {
@@ -203,6 +224,8 @@ if (required.some((el) => !el)) {
     captureToken += 1;
     frameLoop.stop();
     camera.stop();
+    tilt.stop();
+    tiltStarted = false;
     setStatus(t("camera.status.stopped"));
     setCameraControls(false);
   }
@@ -232,6 +255,10 @@ if (required.some((el) => !el)) {
     const isAborted = () => token !== captureToken || !camera.isRunning();
     setCaptureButtons(false);
     try {
+      if (!tiltStarted) {
+        tiltStarted = true;
+        await tilt.start();
+      }
       let aborted = false;
       for (let seconds = Math.round(CAPTURE_DELAY_MS / 1000); seconds > 0; seconds -= 1) {
         debugView.setCaptureStatus(t("debug.capture.countdown", { seconds }));
@@ -252,16 +279,20 @@ if (required.some((el) => !el)) {
           nextFrame: nextVideoFrame,
           onProgress: (done, total) => debugView.setCaptureStatus(t("debug.capture.collecting", { done, total })),
           isAborted,
+          getDevicePitchDeg: tilt.pitchDeg,
         });
+      }
+      if (result.code !== "aborted") {
+        session.record(view, result);
+        scanView.render(session.snapshot());
       }
       if (result.ok) {
         captured[view] = result;
         debugView.setCaptureStatus(t("debug.capture.done"));
-      } else if (result.code === "aborted") {
-        debugView.setCaptureStatus(t("debug.capture.failed", { reason: t("camera.status.stopped") }));
       } else {
+        if (result.code !== "aborted") captured[view] = null;
         debugView.setCaptureStatus(t("debug.capture.failed", {
-          reason: t("debug.reading.unavailable." + (result.lastCode ?? result.code)),
+          reason: t("scan.reason." + (result.reason ?? result.code)),
         }));
       }
       refreshCaptured();
@@ -275,6 +306,8 @@ if (required.some((el) => !el)) {
   function clearCaptured() {
     captured.front = null;
     captured.side = null;
+    session.clear();
+    scanView.render(session.snapshot());
     debugView.setCaptureStatus("");
     refreshCaptured();
   }
