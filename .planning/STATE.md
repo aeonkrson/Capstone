@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-10-13T09:59:58.418Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-10-13T10:02:18.251Z"
 last_activity: 2026-10-04
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 18
+  completed_plans: 19
   percent: 40
 ---
 
@@ -30,7 +30,7 @@ Plan: 6 of 8 in current phase
 Status: Ready to execute
 Last activity: 2026-10-04
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 79%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [███████░░░] 67%
 | Phase 04 P01 | 3min | 1 tasks | 2 files |
 | Phase 04 P02 | 8min | 2 tasks | 4 files |
 | Phase 04 P03 | 6min | 2 tasks | 4 files |
+| Phase 04 P05 | 6min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,7 @@ Recent decisions affecting current work:
 - [Phase 03]: Phase 3 measurements live in src/core/scan.js on top of frozen measureView; one CALIBRATION table with priors (shoulder +2.0 cm) until 03-05 fits tape data
 - [Phase 03]: A rejected scan view shows one reason (dominant per-frame code, or moving); user re-captures only that view (P3-D17) — Plan 03-04
 - [Phase 04]: auto-lock reducer in src/core/autoLock.js; ok gate with null anchors = no-pose; drift checked before hold time
+- [Phase 04]: Phase 4 markup ids and i18n keys fixed in 04-05; old scan Use path removed, main.js onUse left until 04-07
 
 ### Pending Todos
 
@@ -105,6 +107,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-10-13T09:59:58.415Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-10-13T10:02:18.086Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None
