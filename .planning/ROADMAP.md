@@ -170,7 +170,7 @@ Plans:
   4. A results table records error per measurement and per device (phone, laptop), with subjects identified by anonymous ID and photos kept out of the repository.
   5. The whole flow (consent, scan, review, verdict, history) has been run on a real iPhone, a real Android phone and a laptop over HTTPS, and a recorded fallback demo exists in case the venue fails.
 
-**Plans:** 3/7 plans executed
+**Plans:** 4/7 plans executed
 
 Plans:
 **Wave 1**
@@ -181,7 +181,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 05-04-PLAN.md — Startup preflight message and debug fps readout
+- [x] 05-04-PLAN.md — Startup preflight message and debug fps readout
 - [ ] 05-05-PLAN.md — Study protocol, full-flow device checklist, demo recording script (human items, all "not run"), media kept out of git
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -201,4 +201,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
 | 3. Measurement Engine | 5/5 | Complete (tape session outstanding) | 2026-10-13 |
 | 4. Live AR Guided Capture | 7/7 | Complete   | 2026-10-13 |
-| 5. Validation and Demo Hardening | 3/7 | In Progress|  |
+| 5. Validation and Demo Hardening | 4/7 | In Progress|  |
