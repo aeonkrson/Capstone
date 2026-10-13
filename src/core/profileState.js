@@ -112,6 +112,38 @@ export function applyScan(state, measurements) {
 }
 
 /**
+ * Save a reviewed scan. A value equal to the scanned one (to 0.1 cm) gets source "scanned", otherwise "edited".
+ * Null or undefined values are skipped (old value kept); out-of-range values are rejected.
+ * @param {object} state - current state
+ * @param {object} scanned - state key -> scanned cm or null
+ * @param {object} values - state key -> reviewed cm or null
+ * @returns {{ state: object, applied: string[], rejected: string[] }} new state and key lists
+ */
+export function applyReview(state, scanned, values) {
+  const next = cloneState(state);
+  const applied = [];
+  const rejected = [];
+  const scan = isObject(scanned) ? scanned : {};
+  const input = isObject(values) ? values : {};
+  const round1 = (x) => Math.round(x * 10) / 10;
+  for (const key of MEASUREMENT_KEYS) {
+    const raw = own(input, key) ? input[key] : null;
+    if (raw === null || raw === undefined) continue;
+    const cm = typeof raw === "number" && Number.isFinite(raw) ? round1(raw) : raw;
+    if (!inRange(key, cm)) {
+      rejected.push(key);
+      continue;
+    }
+    const was = own(scan, key) ? scan[key] : null;
+    const same = typeof was === "number" && Number.isFinite(was) && round1(was) === cm;
+    next.measurements[key] = cm;
+    next.sources[key] = same ? "scanned" : "edited";
+    applied.push(key);
+  }
+  return { state: next, applied, rejected };
+}
+
+/**
  * Prepend a fit-check entry; history is capped at HISTORY_LIMIT, newest first.
  * @param {object} state - current state
  * @param {object} entry - { garmentId, garmentName, size, preference, verdict, at }
