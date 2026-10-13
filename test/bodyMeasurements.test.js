@@ -24,6 +24,8 @@ test("ranges are inclusive and exported", () => {
     chest: { min: 60, max: 160 },
     shoulder: { min: 25, max: 60 },
     torso: { min: 30, max: 70 },
+    waist: { min: 50, max: 150 },
+    arm: { min: 40, max: 85 },
   });
   for (const [key, { min, max }] of Object.entries(BODY_FIELDS)) {
     assert.equal(validateBodyMeasurement(key, String(min)).ok, true);
@@ -34,7 +36,7 @@ test("ranges are inclusive and exported", () => {
 });
 
 test("unknown key throws", () => {
-  assert.throws(() => validateBodyMeasurement("waist", "70"), Error);
+  assert.throws(() => validateBodyMeasurement("hip", "70"), Error);
 });
 
 test("catalog lists only the plain white tee", () => {

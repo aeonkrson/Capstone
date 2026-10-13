@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   emptyState, sanitiseState, setProfileName, setMeasurement, addHistoryEntry, HISTORY_LIMIT,
+  applyScan, ESTIMATE_KEYS, MEASUREMENT_KEYS,
 } from "../src/core/profileState.js";
 
 const entry = (n = 1) => ({
@@ -13,8 +14,8 @@ test("emptyState shape", () => {
   assert.deepEqual(emptyState(), {
     version: 1,
     profile: null,
-    measurements: { chestCm: null, shoulderCm: null, torsoCm: null },
-    sources: { chestCm: null, shoulderCm: null, torsoCm: null },
+    measurements: { chestCm: null, shoulderCm: null, torsoCm: null, waistCm: null, armCm: null },
+    sources: { chestCm: null, shoulderCm: null, torsoCm: null, waistCm: null, armCm: null },
     preference: "regular",
     history: [],
   });
@@ -107,4 +108,61 @@ test("sanitiseState ignores hostile keys and extra fields", () => {
   assert.equal(out.history[0].image, undefined);
   assert.equal(out.history[0].evil, undefined);
   assert.equal({}.polluted, undefined);
+});
+
+const FULL = { shoulderCm: 40, chestCm: 90, waistCm: 80, torsoCm: 50, armCm: 60 };
+
+test("key lists", () => {
+  assert.deepEqual(ESTIMATE_KEYS, ["waistCm", "torsoCm", "armCm"]);
+  assert.deepEqual(MEASUREMENT_KEYS, ["chestCm", "shoulderCm", "torsoCm", "waistCm", "armCm"]);
+});
+
+test("applyScan sets all five as scanned without mutating input", () => {
+  const s = emptyState();
+  const r = applyScan(s, FULL);
+  for (const k of MEASUREMENT_KEYS) {
+    assert.equal(r.state.measurements[k], FULL[k]);
+    assert.equal(r.state.sources[k], "scanned");
+  }
+  assert.equal(r.applied.length, 5);
+  assert.deepEqual(r.rejected, []);
+  assert.deepEqual(s, emptyState());
+});
+
+test("applyScan rejects null and out-of-range, keeps old values", () => {
+  let s = setMeasurement(emptyState(), "waistCm", 70);
+  const r = applyScan(s, { ...FULL, armCm: null, waistCm: 200 });
+  assert.deepEqual(r.rejected.sort(), ["armCm", "waistCm"]);
+  assert.equal(r.applied.length, 3);
+  assert.equal(r.state.measurements.waistCm, 70);
+  assert.equal(r.state.measurements.armCm, null);
+  assert.equal(r.state.measurements.chestCm, 90);
+});
+
+test("applyScan replaces typed values; later edit marks edited", () => {
+  let s = setMeasurement(emptyState(), "chestCm", 85);
+  s = applyScan(s, FULL).state;
+  assert.equal(s.measurements.chestCm, 90);
+  assert.equal(s.sources.chestCm, "scanned");
+  s = setMeasurement(s, "chestCm", 91);
+  assert.equal(s.sources.chestCm, "edited");
+});
+
+test("applyScan rounds to 0.1 and ignores unknown keys", () => {
+  const r = applyScan(emptyState(), { chestCm: 90, shoulderCm: 38.27, bogus: 5, __proto__: { x: 1 } });
+  assert.equal(r.state.measurements.shoulderCm, 38.3);
+  assert.equal(r.state.measurements.bogus, undefined);
+});
+
+test("sanitiseState keeps scanned, loads old states, fixes bogus source", () => {
+  const s = applyScan(emptyState(), FULL).state;
+  assert.deepEqual(sanitiseState(JSON.parse(JSON.stringify(s))), s);
+  const old = sanitiseState({
+    version: 1, profile: { name: "A" },
+    measurements: { chestCm: 90, shoulderCm: 40, torsoCm: 50 },
+    sources: { chestCm: "bogus", shoulderCm: "typed", torsoCm: "edited" },
+  });
+  assert.equal(old.measurements.waistCm, null);
+  assert.equal(old.measurements.armCm, null);
+  assert.equal(old.sources.chestCm, "typed");
 });
