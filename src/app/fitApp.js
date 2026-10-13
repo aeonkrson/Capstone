@@ -2,7 +2,7 @@ import { createProfileView } from "../ui/profileView.js";
 import { createSettingsView } from "../ui/settingsView.js";
 import { createCatalogView } from "../ui/catalogView.js";
 import { createFitView } from "../ui/fitView.js";
-import { emptyState, setProfileName, setMeasurement, addHistoryEntry, applyScan } from "../core/profileState.js";
+import { emptyState, setProfileName, setMeasurement, addHistoryEntry, applyScan, applyReview } from "../core/profileState.js";
 import { checkFit, recommendAll } from "../core/fit.js";
 import { CATALOG } from "../data/catalog.js";
 import { setLocale, getLocale } from "../i18n/index.js";
@@ -12,6 +12,8 @@ export function initFitApp({ doc, storage, t, formatNumber, applyTranslations })
   let selectedGarmentId = CATALOG[0].id;
   // The check currently on screen, re-run on every render so it is never stale.
   let lastCheck = null;
+  // Key of the manual-entry message on screen, re-translated on every render.
+  let manualRouteKey = null;
 
   function selectedGarment() {
     return CATALOG.find((g) => g.id === selectedGarmentId) || CATALOG[0];
@@ -58,6 +60,10 @@ export function initFitApp({ doc, storage, t, formatNumber, applyTranslations })
       if (!showCheck(lastCheck)) lastCheck = null;
     } else {
       fitView.hideResult();
+    }
+    if (manualRouteKey) {
+      const el = doc.getElementById("manual-route-status");
+      if (el) el.textContent = t(manualRouteKey);
     }
   }
 
@@ -162,6 +168,58 @@ export function initFitApp({ doc, storage, t, formatNumber, applyTranslations })
     return { ok: true, applied: r.applied, rejected: r.rejected };
   }
 
+  // Save a reviewed scan; creates the profile name first if there is none (one update).
+  function applyReviewResult({ name, scanned, values }) {
+    let base = state;
+    if (!base.profile) {
+      const named = setProfileName(base, name);
+      if (named.ok === false) return { ok: false, code: "name-" + named.code };
+      base = named;
+    }
+    const r = applyReview(base, scanned, values);
+    lastCheck = null;
+    update(r.state);
+    return { ok: true, applied: r.applied, rejected: r.rejected };
+  }
+
+  function hasProfile() {
+    return Boolean(state.profile);
+  }
+
+  function scrollAndFocus(target, focusEl) {
+    if (target && typeof target.scrollIntoView === "function") target.scrollIntoView();
+    if (focusEl && typeof focusEl.focus === "function") focusEl.focus();
+  }
+
+  function goToFitCheck() {
+    const hint = doc.getElementById("fit-hint");
+    const size = doc.getElementById("fit-size");
+    const controlsHidden = !size || (hint && !hint.hasAttribute("hidden"));
+    scrollAndFocus(doc.getElementById("fit-section"), controlsHidden ? hint : size);
+  }
+
+  function showManualEntry(messageKey) {
+    manualRouteKey = messageKey;
+    const el = doc.getElementById("manual-route-status");
+    if (el) {
+      el.textContent = t(messageKey);
+      el.removeAttribute("hidden");
+    }
+    if (hasProfile()) {
+      scrollAndFocus(doc.getElementById("body-section"), doc.getElementById("body-chest"));
+    } else {
+      scrollAndFocus(doc.getElementById("profile-section"), doc.getElementById("profile-name"));
+    }
+  }
+
   render();
-  return { render, getState: () => state, applyScan: applyScanResult };
+  return {
+    render,
+    getState: () => state,
+    applyScan: applyScanResult,
+    applyReview: applyReviewResult,
+    hasProfile,
+    goToFitCheck,
+    showManualEntry,
+  };
 }
