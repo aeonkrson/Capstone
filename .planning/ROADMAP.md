@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Foundation and Accuracy Spike** - Pinned on-device pose and silhouette running on real phones and laptops over HTTPS, with a go/no-go on the measurement set and accuracy bar
 - [x] **Phase 2: Manual-Entry Fit Check** - Type your measurements, pick a ColourBox top and size, and get a verdict and recommended size, saved locally in English or Indonesian (completed 2026-10-08)
 - [x] **Phase 3: Measurement Engine** - Turn a front and side capture plus typed height into calibrated cm measurements, with quality gates (code complete 2026-10-13; team tape accuracy session outstanding)
-- [ ] **Phase 4: Live AR Guided Capture** - Consent, then a hands-free guided front and side scan that auto-locks with sound cues and ends at a measurement review
+- [x] **Phase 4: Live AR Guided Capture** - Consent, then a hands-free guided front and side scan that auto-locks with sound cues and ends at a measurement review (completed 2026-10-13)
 - [ ] **Phase 5: Validation and Demo Hardening** - Team tape study, per-device accuracy results, rescan, and a demo that holds up on real devices
 
 ## Phase Details
@@ -135,7 +135,7 @@ Plans:
   5. A full scan completes in a phone browser and on a laptop webcam. If the camera is denied or unavailable, the user sees a clear message and is sent to manual measurement entry.
   6. The scan ends at a review screen showing all measurements in cm, each marked scanned or edited, with the less reliable ones marked as estimates; the user can correct any value and go straight on to a fit check.
 
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans complete
 
 Plans:
 **Wave 1**
@@ -152,7 +152,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 04-07-PLAN.md — main.js wiring: consent gating, live guide overlay, hands-free scan with sound, review, manual routing and fallback (wave 3; real-device check listed as outstanding, not a gate)
+- [x] 04-07-PLAN.md — main.js wiring: consent gating, live guide overlay, hands-free scan with sound, review, manual routing and fallback (wave 3; real-device check listed as outstanding, not a gate)
 
 **UI hint**: yes
 
@@ -183,5 +183,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
 | 3. Measurement Engine | 5/5 | Complete (tape session outstanding) | 2026-10-13 |
-| 4. Live AR Guided Capture | 6/7 | In Progress|  |
+| 4. Live AR Guided Capture | 7/7 | Complete   | 2026-10-13 |
 | 5. Validation and Demo Hardening | 0/TBD | Not started | - |
