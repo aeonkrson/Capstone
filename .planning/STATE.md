@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-02)
 
 **Core value:** A shopper who picks a size gets a fit answer they can trust, because the body measurements behind it are close to what a tape measure would give.
-**Current focus:** Phase 1 - Foundation and Accuracy Spike
+**Current focus:** Phase 5 - Validation and Demo Hardening
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation and Accuracy Spike)
-Plan: 6 of 8 in current phase
-Status: Ready to execute
-Last activity: 2026-10-04
+Phase: 5 of 5 (Validation and Demo Hardening)
+Plan: 7 of 7 in current phase
+Status: Code complete; human sessions outstanding (see HUMAN-TODO.md)
+Last activity: 2026-10-13
 
-Progress: [█████████░] 90%
+Progress: code done for all phases; accuracy, device and study evidence not yet collected
 
 ## Performance Metrics
 
@@ -100,6 +100,9 @@ Recent decisions affecting current work:
 - [Phase 05]: A saved review always replaces all five measurements (applyRescan); empty/rejected keys cleared
 - [Phase 05]: Phase 5 study: size agreement uses recommendSize(chest, regular, CATALOG[0].chart); empty Subjects cell reads no data
 - [Phase 05]: Preflight line is informational only; camera and consent flow unchanged (05-04)
+- [Phase 05]: D-02 rescan replaces all five measurements; empty optional keys cleared; history kept
+- [Phase 05]: D-05 study targets per device class (shoulder <= 2.5 cm, chest <= 3.5 cm, size agreement); GO / CONDITIONAL / NO-GO / INSUFFICIENT DATA rules; targets are exported constants
+- [Phase 05]: D-08 npm run build copies vendor wasm and models into dist and checks SHA-256; npm run demo serves over HTTPS
 - [Phase 05]: ARCHITECTURE overview written as bullets so generate-claude-md keeps it
 
 ### Pending Todos
@@ -108,10 +111,14 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 1]: ColourBox size chart values not yet collected; Phase 2 uses marked placeholders until they are.
-- [Phase 1]: MEAS-03 (waist) is a v1 requirement, but research rates it unreliable and recommends dropping it. The Phase 1 go/no-go decides: keep as editable estimate, manual-entry only, or defer to v2.
-- [Phase 1]: Tasks Vision 1.0.1 on current iOS Safari (masks, delegate, orientation) is unverified; test on a real iPhone in week 1.
-- [Phase 3]: Highest-risk phase; chest and torso accuracy are tuning problems against tape data.
+All open items are human sessions, listed in order in HUMAN-TODO.md.
+
+- [Phase 1]: ColourBox boxy size chart not yet collected (HUMAN-TODO.md section 1).
+- [Phase 1]: MEAS-03 (waist) go/no-go decision open (HUMAN-TODO.md section 2).
+- [Phase 1]: Tasks Vision 1.0.1 on current iOS Safari unverified (HUMAN-TODO.md sections 1 and 4).
+- [Phase 3]: Calibration offsets are priors until the tape session runs (HUMAN-TODO.md section 3).
+- [Phase 4]: Guided scan not seen on real cameras (HUMAN-TODO.md section 4).
+- [Phase 5]: Full-flow device run, accuracy study, fallback recording and Indonesian review outstanding (HUMAN-TODO.md sections 5 to 8).
 
 ## Deferred Items
 
