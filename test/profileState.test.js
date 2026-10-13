@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   emptyState, sanitiseState, setProfileName, setMeasurement, addHistoryEntry, HISTORY_LIMIT,
-  applyScan, ESTIMATE_KEYS, MEASUREMENT_KEYS, applyReview,
+  applyScan, ESTIMATE_KEYS, MEASUREMENT_KEYS, applyReview, applyRescan,
 } from "../src/core/profileState.js";
 
 const entry = (n = 1) => ({
@@ -210,5 +210,56 @@ test("applyReview: no mutation, history/profile/preference preserved, sanitise r
   assert.deepEqual(r.state.profile, { name: "Jo" });
   assert.equal(r.state.preference, "loose");
   assert.equal(r.state.history.length, 1);
+  assert.deepEqual(sanitiseState(r.state), r.state);
+});
+
+const fullState = () => {
+  let s = setProfileName(emptyState(), "Jo");
+  for (const [k, v] of Object.entries({ chestCm: 88, shoulderCm: 39, torsoCm: 47, waistCm: 75, armCm: 55 })) {
+    s = setMeasurement(s, k, v);
+  }
+  return s;
+};
+
+test("applyRescan: replaces given values and clears empty ones", () => {
+  const r = applyRescan(fullState(), reviewScan, { ...reviewScan, armCm: null, waistCm: null });
+  assert.equal(r.state.measurements.chestCm, 92);
+  assert.equal(r.state.measurements.shoulderCm, 42);
+  assert.equal(r.state.measurements.torsoCm, 50);
+  assert.equal(r.state.measurements.waistCm, null);
+  assert.equal(r.state.sources.waistCm, null);
+  assert.equal(r.state.measurements.armCm, null);
+  assert.equal(r.state.sources.armCm, null);
+  assert.deepEqual(r.cleared, ["waistCm", "armCm"]);
+  assert.deepEqual(r.applied, ["chestCm", "shoulderCm", "torsoCm"]);
+  assert.deepEqual(r.rejected, []);
+});
+
+test("applyRescan: same as scanned is scanned, different is edited", () => {
+  const r = applyRescan(fullState(), reviewScan, { ...reviewScan, chestCm: 95.04 });
+  assert.equal(r.state.measurements.chestCm, 95);
+  assert.equal(r.state.sources.chestCm, "edited");
+  assert.equal(r.state.sources.shoulderCm, "scanned");
+  assert.equal(r.state.sources.armCm, "scanned");
+});
+
+test("applyRescan: out-of-range value is rejected and cleared, old not kept", () => {
+  const r = applyRescan(fullState(), reviewScan, { ...reviewScan, torsoCm: 75, armCm: Number.NaN });
+  assert.deepEqual(r.rejected, ["torsoCm", "armCm"]);
+  assert.deepEqual(r.cleared, ["torsoCm", "armCm"]);
+  assert.equal(r.state.measurements.torsoCm, null);
+  assert.equal(r.state.sources.torsoCm, null);
+  assert.equal(r.state.measurements.armCm, null);
+});
+
+test("applyRescan: no mutation, history/profile/preference preserved, sanitise round-trip", () => {
+  let base = addHistoryEntry(fullState(), entry(1));
+  base = { ...base, preference: "loose" };
+  const snapshot = JSON.stringify(base);
+  const r = applyRescan(base, reviewScan, { ...reviewScan, waistCm: null });
+  assert.equal(JSON.stringify(base), snapshot);
+  assert.deepEqual(r.state.profile, { name: "Jo" });
+  assert.equal(r.state.preference, "loose");
+  assert.deepEqual(r.state.history, base.history);
   assert.deepEqual(sanitiseState(r.state), r.state);
 });
