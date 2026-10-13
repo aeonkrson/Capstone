@@ -11,6 +11,11 @@ import { createScanView } from "./ui/scanView.js";
 import { createTiltSensor } from "./platform/tilt.js";
 import * as storage from "./platform/storage.js";
 import { initFitApp } from "./app/fitApp.js";
+import { createGuidedScan } from "./app/guidedScan.js";
+import { createSound } from "./platform/sound.js";
+import { createConsentView } from "./ui/consentView.js";
+import { createReviewView } from "./ui/reviewView.js";
+import { createGuideView } from "./ui/guideView.js";
 
 const locale = initLocale(storage.loadLocale() ?? navigator.language);
 document.documentElement.lang = locale;
@@ -56,6 +61,9 @@ const captureResetBtn = document.getElementById("btn-capture-reset");
 const captureStatusEl = document.getElementById("capture-status");
 const debugLiveEl = document.getElementById("debug-live");
 const debugCapturedEl = document.getElementById("debug-captured");
+const guideHintEl = document.getElementById("guide-hint");
+const guideRestartBtn = document.getElementById("btn-guide-restart");
+const manualEntryBtn = document.getElementById("btn-manual-entry");
 
 const required = [
   heightSectionEl, heightFormEl, heightInputEl, heightErrorEl,
@@ -87,23 +95,57 @@ if (required.some((el) => !el)) {
   let capturing = false;
   // Scan results shown to the user: burst summaries only, in memory.
   const session = createScanSession();
-  const scanView = createScanView({
+  const scanView = createScanView({ doc: document, t });
+  scanView.render(session.snapshot());
+  // Live pose guide outline and hint line (CAPT-02, CAPT-03).
+  const guideView = createGuideView({ canvasEl: viewCanvasEl, hintEl: guideHintEl, t });
+  // Sound cues; unlocked by the consent Accept click (P4-D11).
+  const sound = createSound();
+  // Review of scanned numbers before they are saved (MEAS-06).
+  const reviewView = createReviewView({
     doc: document,
     t,
     formatNumber,
-    onUse(snapshot) {
-      scanView.showUseResult(fitApp.applyScan(snapshot.combined.measurements));
+    onSave(payload) {
+      const r = fitApp.applyReview(payload);
+      if (r.ok) fitApp.goToFitCheck();
+      return r;
     },
   });
-  scanView.render(session.snapshot());
   // Re-render the scan lines after the settings language switch (registered earlier, so it runs first).
   document.getElementById("language-select")?.addEventListener("change", () => {
     scanView.render(session.snapshot());
+    reviewView.refresh();
+    const key = guideView.currentKey();
+    if (key) guideView.setMessage(key, { force: true });
   });
-  // Phone tilt; started on the first Capture click (iOS needs a user gesture).
+  // Phone tilt; started from the consent Accept click (iOS needs a user gesture).
   const tilt = createTiltSensor();
   let tiltStarted = false;
   debugView.setOptions({ mirror: flags.camera !== "rear" });
+
+  function startTilt() {
+    if (tiltStarted) return Promise.resolve(true);
+    tiltStarted = true;
+    return tilt.start();
+  }
+
+  // Camera consent, in memory for this page load only (PRIV-01, P4-D17).
+  let consented = false;
+  const consentView = createConsentView({
+    doc: document,
+    onAccept() {
+      consented = true;
+      sound.unlock();
+      startTilt();
+      consentView.hide();
+      startCamera();
+    },
+    onDecline() {
+      consentView.hide();
+      fitApp.showManualEntry("manual.declined");
+    },
+  });
 
   function setStatus(text) {
     if (text === lastStatus) return;
@@ -133,6 +175,7 @@ if (required.some((el) => !el)) {
       cameraErrorEl.removeAttribute("hidden");
       setStatus(t("camera.status.stopped"));
       setCameraControls(false);
+      fitApp.showManualEntry("manual.routed");
       return null;
     }
   }
@@ -142,7 +185,9 @@ if (required.some((el) => !el)) {
     onFrame(timestampMs) {
       if (!pose) return;
       const t0 = performance.now();
-      const obs = pose.detect(webcamElement, timestampMs, { wantMask: flags.debug });
+      const guiding = guided.status().active;
+      // The guided gate needs the mask on every frame (P4-D16).
+      const obs = pose.detect(webcamElement, timestampMs, { wantMask: flags.debug || guiding });
       const inferenceMs = performance.now() - t0;
       let guides;
       if (flags.debug) {
@@ -151,6 +196,11 @@ if (required.some((el) => !el)) {
         if (reading.ok) guides = reading;
       }
       debugView.render({ videoEl: webcamElement, obs, guides });
+      if (guiding) {
+        const status = guided.onFrame(obs, timestampMs, tilt.pitchDeg());
+        guideView.draw(status);
+        guideView.setMessage(status.messageKey);
+      }
       setStatus(obs ? t("camera.status.detected") : t("camera.status.searching"));
       if (flags.debug) {
         debugView.setEngineInfo({
@@ -194,6 +244,10 @@ if (required.some((el) => !el)) {
   }
 
   async function startCamera() {
+    if (!consented) {
+      consentView.show();
+      return;
+    }
     if (starting) return;
     starting = true;
     try {
@@ -210,11 +264,17 @@ if (required.some((el) => !el)) {
         cameraErrorEl.removeAttribute("hidden");
         setStatus(t("camera.status.stopped"));
         setCameraControls(false);
+        fitApp.showManualEntry("manual.routed");
         return;
       }
+      startTilt();
       frameLoop.start();
       setStatus(t("camera.status.searching"));
       setCameraControls(true);
+      // A fresh guided scan each time the camera starts (P4-D23).
+      clearCaptured();
+      reviewView.hide();
+      guided.start();
     } finally {
       starting = false;
     }
@@ -222,6 +282,8 @@ if (required.some((el) => !el)) {
 
   function stopCamera() {
     captureToken += 1;
+    guided.stop();
+    guideView.clear();
     frameLoop.stop();
     camera.stop();
     tilt.stop();
@@ -246,21 +308,22 @@ if (required.some((el) => !el)) {
 
   const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 
-  async function capture(view) {
-    if (!camera.isRunning() || capturing || !pose || heightCm === null) return;
+  const ABORTED = Object.freeze({ ok: false, code: "aborted", n: 0 });
+
+  // Runs one burst for a view; with countdown false it starts at once (guided scan).
+  async function capture(view, { countdown = true } = {}) {
+    if (!camera.isRunning() || capturing || !pose || heightCm === null) return { ...ABORTED };
     capturing = true;
     captureToken += 1;
     const token = captureToken;
     const heightAtStart = heightCm;
     const isAborted = () => token !== captureToken || !camera.isRunning();
     setCaptureButtons(false);
+    let result = { ...ABORTED };
     try {
-      if (!tiltStarted) {
-        tiltStarted = true;
-        await tilt.start();
-      }
-      let aborted = false;
-      for (let seconds = Math.round(CAPTURE_DELAY_MS / 1000); seconds > 0; seconds -= 1) {
+      await startTilt();
+      let aborted = isAborted();
+      for (let seconds = countdown ? Math.round(CAPTURE_DELAY_MS / 1000) : 0; !aborted && seconds > 0; seconds -= 1) {
         debugView.setCaptureStatus(t("debug.capture.countdown", { seconds }));
         await sleep(1000);
         if (isAborted()) {
@@ -268,7 +331,6 @@ if (required.some((el) => !el)) {
           break;
         }
       }
-      let result = { ok: false, code: "aborted", n: 0 };
       if (!aborted) {
         frameLoop.stop();
         result = await runBurst({
@@ -296,12 +358,39 @@ if (required.some((el) => !el)) {
         }));
       }
       refreshCaptured();
+      if (result.code !== "aborted") maybeOpenReview();
     } finally {
       capturing = false;
       setCaptureButtons(true);
       if (camera.isRunning()) frameLoop.start();
     }
+    return result;
   }
+
+  // Both views good: stop the camera and open the review (MEAS-06, P4-D20).
+  function maybeOpenReview() {
+    const { combined } = session.snapshot();
+    if (!combined || !combined.ok || reviewView.isShown()) return;
+    // stopCamera drops the guided late result, so play its final captured cue here.
+    const wasGuided = guided.status().active;
+    stopCamera();
+    if (wasGuided) sound.play("captured");
+    reviewView.show({ scanned: combined.measurements, hasProfile: fitApp.hasProfile() });
+  }
+
+  // Hands-free scan: gate -> auto-lock -> burst, with sound cues (CAPT-04 to CAPT-08).
+  const guided = createGuidedScan({
+    capture: (view) => capture(view, { countdown: false }),
+    cue: (name) => sound.play(name),
+    onChange(status) {
+      guideView.setMessage(status.messageKey);
+      // A good scan is already in review (camera stopped); a bad combine starts over.
+      if (status.phase === "done" && !session.snapshot().combined?.ok) {
+        clearCaptured();
+        guided.restart();
+      }
+    },
+  });
 
   function clearCaptured() {
     captured.front = null;
@@ -312,9 +401,28 @@ if (required.some((el) => !el)) {
     refreshCaptured();
   }
 
-  captureFrontBtn?.addEventListener("click", () => { capture("front"); });
-  captureSideBtn?.addEventListener("click", () => { capture("side"); });
+  // Manual capture fallback: stops the guided scan, keeps the countdown (P4-D20).
+  function manualCapture(view) {
+    guided.stop();
+    guideView.setMessage("guide.manual-mode");
+    capture(view);
+  }
+
+  captureFrontBtn?.addEventListener("click", () => { manualCapture("front"); });
+  captureSideBtn?.addEventListener("click", () => { manualCapture("side"); });
   captureResetBtn?.addEventListener("click", clearCaptured);
+
+  guideRestartBtn?.addEventListener("click", () => {
+    captureToken += 1; // abort any countdown or burst still running
+    clearCaptured();
+    reviewView.hide();
+    if (camera.isRunning()) guided.restart();
+    else startCamera();
+  });
+
+  manualEntryBtn?.addEventListener("click", () => {
+    fitApp.showManualEntry("manual.routed");
+  });
 
   const heightForm = createHeightForm({
     formEl: heightFormEl,
