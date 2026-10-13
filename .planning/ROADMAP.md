@@ -135,12 +135,12 @@ Plans:
   5. A full scan completes in a phone browser and on a laptop webcam. If the camera is denied or unavailable, the user sees a clear message and is sent to manual measurement entry.
   6. The scan ends at a review screen showing all measurements in cm, each marked scanned or edited, with the less reliable ones marked as estimates; the user can correct any value and go straight on to a fit check.
 
-**Plans:** 7 plans
+**Plans:** 1/7 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 04-01-PLAN.md — Pure auto-lock state machine in core: hold-still lock, turn phase, cues, hints from Phase 3 reason codes (TDD, wave 1)
+- [x] 04-01-PLAN.md — Pure auto-lock state machine in core: hold-still lock, turn phase, cues, hints from Phase 3 reason codes (TDD, wave 1)
 - [ ] 04-02-PLAN.md — Pure review model: scanned/edited/estimate rows, input parsing, profileState.applyReview (TDD, wave 1)
 - [ ] 04-03-PLAN.md — WebAudio sound cues (hold, captured, turn) and pose guide figure geometry (wave 1)
 - [ ] 04-05-PLAN.md — Consent, guide hint, manual-entry and review markup plus en/id strings; consent view; scan view trimmed (wave 1)
@@ -183,5 +183,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
 | 3. Measurement Engine | 5/5 | Complete (tape session outstanding) | 2026-10-13 |
-| 4. Live AR Guided Capture | 0/TBD | Not started | - |
+| 4. Live AR Guided Capture | 1/7 | In Progress|  |
 | 5. Validation and Demo Hardening | 0/TBD | Not started | - |

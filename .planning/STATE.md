@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-05-PLAN.md (human tape session outstanding)
-last_updated: "2026-10-13T09:44:14.242Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-10-13T09:56:52.178Z"
 last_activity: 2026-10-04
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 17
-  completed_plans: 15
+  total_plans: 24
+  completed_plans: 16
   percent: 40
 ---
 
@@ -30,7 +30,7 @@ Plan: 6 of 8 in current phase
 Status: Ready to execute
 Last activity: 2026-10-04
 
-Progress: [████████░░] 82%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [████████░░] 82%
 | Phase 03 P02 | 6min | 2 tasks | 4 files |
 | Phase 03 P03 | 8min | 2 tasks | 9 files |
 | Phase 03 P04 | 5min | 2 tasks | 9 files |
+| Phase 04 P01 | 3min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,7 @@ Recent decisions affecting current work:
 - [Phase 01]: Locale follows navigator.language; no switcher or storage in Phase 1
 - [Phase 03]: Phase 3 measurements live in src/core/scan.js on top of frozen measureView; one CALIBRATION table with priors (shoulder +2.0 cm) until 03-05 fits tape data
 - [Phase 03]: A rejected scan view shows one reason (dominant per-frame code, or moving); user re-captures only that view (P3-D17) — Plan 03-04
+- [Phase 04]: auto-lock reducer in src/core/autoLock.js; ok gate with null anchors = no-pose; drift checked before hold time
 
 ### Pending Todos
 
@@ -101,6 +103,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-10-13T09:44:14.238Z
-Stopped at: Completed 03-05-PLAN.md (human tape session outstanding)
+Last session: 2026-10-13T09:56:52.017Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
