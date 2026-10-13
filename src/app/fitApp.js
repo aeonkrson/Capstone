@@ -2,7 +2,7 @@ import { createProfileView } from "../ui/profileView.js";
 import { createSettingsView } from "../ui/settingsView.js";
 import { createCatalogView } from "../ui/catalogView.js";
 import { createFitView } from "../ui/fitView.js";
-import { emptyState, setProfileName, setMeasurement, addHistoryEntry, applyScan, applyReview } from "../core/profileState.js";
+import { emptyState, setProfileName, setMeasurement, addHistoryEntry, applyScan, applyRescan, MEASUREMENT_KEYS } from "../core/profileState.js";
 import { checkFit, recommendAll } from "../core/fit.js";
 import { CATALOG } from "../data/catalog.js";
 import { setLocale, getLocale } from "../i18n/index.js";
@@ -168,18 +168,24 @@ export function initFitApp({ doc, storage, t, formatNumber, applyTranslations })
     return { ok: true, applied: r.applied, rejected: r.rejected };
   }
 
+  function hasMeasurements() {
+    return MEASUREMENT_KEYS.some((key) => state.measurements[key] !== null);
+  }
+
   // Save a reviewed scan; creates the profile name first if there is none (one update).
+  // A saved review is always a whole scan, so it replaces every measurement (applyRescan).
   function applyReviewResult({ name, scanned, values }) {
+    const replaced = hasMeasurements();
     let base = state;
     if (!base.profile) {
       const named = setProfileName(base, name);
       if (named.ok === false) return { ok: false, code: "name-" + named.code };
       base = named;
     }
-    const r = applyReview(base, scanned, values);
+    const r = applyRescan(base, scanned, values);
     lastCheck = null;
     update(r.state);
-    return { ok: true, applied: r.applied, rejected: r.rejected };
+    return { ok: true, applied: r.applied, rejected: r.rejected, cleared: r.cleared, replaced };
   }
 
   function hasProfile() {
@@ -219,6 +225,7 @@ export function initFitApp({ doc, storage, t, formatNumber, applyTranslations })
     applyScan: applyScanResult,
     applyReview: applyReviewResult,
     hasProfile,
+    hasMeasurements,
     goToFitCheck,
     showManualEntry,
   };

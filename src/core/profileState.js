@@ -144,6 +144,46 @@ export function applyReview(state, scanned, values) {
 }
 
 /**
+ * Save a reviewed rescan. Unlike applyReview, every key is replaced: a whole scan never mixes with old values.
+ * Null or undefined values are cleared; non-finite or out-of-range values are rejected and also cleared.
+ * A value equal to the scanned one (to 0.1 cm) gets source "scanned", otherwise "edited".
+ * @param {object} state - current state
+ * @param {object} scanned - state key -> scanned cm or null
+ * @param {object} values - state key -> reviewed cm or null
+ * @returns {{ state: object, applied: string[], rejected: string[], cleared: string[] }} new state and key lists
+ */
+export function applyRescan(state, scanned, values) {
+  const next = cloneState(state);
+  const applied = [];
+  const rejected = [];
+  const cleared = [];
+  const scan = isObject(scanned) ? scanned : {};
+  const input = isObject(values) ? values : {};
+  const round1 = (x) => Math.round(x * 10) / 10;
+  for (const key of MEASUREMENT_KEYS) {
+    const raw = own(input, key) ? input[key] : null;
+    next.measurements[key] = null;
+    next.sources[key] = null;
+    if (raw === null || raw === undefined) {
+      cleared.push(key);
+      continue;
+    }
+    const cm = typeof raw === "number" && Number.isFinite(raw) ? round1(raw) : raw;
+    if (!inRange(key, cm)) {
+      rejected.push(key);
+      cleared.push(key);
+      continue;
+    }
+    const was = own(scan, key) ? scan[key] : null;
+    const same = typeof was === "number" && Number.isFinite(was) && round1(was) === cm;
+    next.measurements[key] = cm;
+    next.sources[key] = same ? "scanned" : "edited";
+    applied.push(key);
+  }
+  return { state: next, applied, rejected, cleared };
+}
+
+/**
  * Prepend a fit-check entry; history is capped at HISTORY_LIMIT, newest first.
  * @param {object} state - current state
  * @param {object} entry - { garmentId, garmentName, size, preference, verdict, at }
