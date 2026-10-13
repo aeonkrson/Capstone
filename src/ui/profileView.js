@@ -1,8 +1,22 @@
 import { BODY_FIELDS, validateBodyMeasurement } from "../core/bodyMeasurements.js";
+import { MEASUREMENT_KEYS, ESTIMATE_KEYS } from "../core/profileState.js";
 
 // Form field key -> state key
 const STATE_KEYS = { chest: "chestCm", shoulder: "shoulderCm", torso: "torsoCm" };
 const FIELD_NAMES = Object.keys(STATE_KEYS);
+// State key -> i18n label key (the sources list covers scan-only fields too)
+const LABEL_KEYS = {
+  chestCm: "body.chest.label", shoulderCm: "body.shoulder.label", torsoCm: "body.torso.label",
+  waistCm: "body.waist.label", armCm: "body.arm.label",
+};
+
+function sourceKey(state, key) {
+  const source = state.sources[key];
+  if (source === "scanned") {
+    return ESTIMATE_KEYS.includes(key) ? "body.source.scanned-estimate" : "body.source.scanned";
+  }
+  return source === "edited" ? "body.source.edited" : "body.source.typed";
+}
 
 export function createProfileView({ doc, t, formatNumber, onSaveName, onSaveMeasurements }) {
   const profileForm = doc.getElementById("profile-form");
@@ -90,15 +104,14 @@ export function createProfileView({ doc, t, formatNumber, onSaveName, onSaveMeas
     }
 
     sourcesEl.textContent = "";
-    for (const name of FIELD_NAMES) {
-      const key = STATE_KEYS[name];
+    for (const key of MEASUREMENT_KEYS) {
       const value = state.measurements[key];
       if (value === null) continue;
       const li = doc.createElement("li");
       li.textContent = t("body.source.line", {
-        label: t("body." + name + ".label"),
+        label: t(LABEL_KEYS[key]),
         value: formatNumber(value),
-        source: t("body.source." + (state.sources[key] === "edited" ? "edited" : "typed")),
+        source: t(sourceKey(state, key)),
       });
       sourcesEl.appendChild(li);
     }

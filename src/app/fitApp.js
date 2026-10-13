@@ -2,7 +2,7 @@ import { createProfileView } from "../ui/profileView.js";
 import { createSettingsView } from "../ui/settingsView.js";
 import { createCatalogView } from "../ui/catalogView.js";
 import { createFitView } from "../ui/fitView.js";
-import { emptyState, setProfileName, setMeasurement, addHistoryEntry } from "../core/profileState.js";
+import { emptyState, setProfileName, setMeasurement, addHistoryEntry, applyScan } from "../core/profileState.js";
 import { checkFit, recommendAll } from "../core/fit.js";
 import { CATALOG } from "../data/catalog.js";
 import { setLocale, getLocale } from "../i18n/index.js";
@@ -154,6 +154,14 @@ export function initFitApp({ doc, storage, t, formatNumber, applyTranslations })
     },
   });
 
+  // Write scan results into the saved profile (needs a profile).
+  function applyScanResult(measurements) {
+    if (!state.profile) return { ok: false, code: "no-profile" };
+    const r = applyScan(state, measurements);
+    update(r.state);
+    return { ok: true, applied: r.applied, rejected: r.rejected };
+  }
+
   render();
-  return { render, getState: () => state };
+  return { render, getState: () => state, applyScan: applyScanResult };
 }
