@@ -1,131 +1,65 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
 
 ## Directory Layout
-
+```text
+.
+├── index.html                 page shell, meta CSP, markup with data-i18n keys
+├── css/style.css              all styles
+├── src/
+│   ├── main.js                entry: flags, preflight, camera, pose, guided scan, review, rescan
+│   ├── core/                  pure logic (no browser globals, no clock)
+│   │   ├── landmarks.js       landmark indices and skeleton connections
+│   │   ├── geometry.js        dist, median, MAD, summarise, ellipse perimeter
+│   │   ├── mask.js            segmentation mask bbox and torso runs
+│   │   ├── scale.js           cm per pixel from height and mask
+│   │   ├── height.js          height validation (120 to 220 cm)
+│   │   ├── measure.js         per-view measurements and bust circumference
+│   │   ├── scan.js            per-frame reading, burst summary, front+side combine
+│   │   ├── calibration.js     CALIBRATION table (prior offsets)
+│   │   ├── quality.js         QUALITY thresholds, frame and stability gates, camera pitch
+│   │   ├── autoLock.js        AUTO_LOCK timings, hands-free lock reducer
+│   │   ├── poseGuide.js       guide outline figure
+│   │   ├── frameRate.js       fps from frame timestamps
+│   │   ├── preflight.js       startup capability codes
+│   │   ├── review.js          review rows and input parsing
+│   │   ├── bodyMeasurements.js body field ranges and validation
+│   │   ├── profileState.js    saved state shape, applyScan/applyReview/applyRescan, history, sanitise
+│   │   ├── fit.js             size recommendation and fit check
+│   │   ├── sizeFromTape.js    tape bust to size (validation reference)
+│   │   └── types.js           JSDoc typedefs
+│   ├── data/
+│   │   ├── colourboxCharts.js ColourBox tee size charts
+│   │   └── catalog.js         CATALOG shown to the user
+│   ├── platform/              browser adapters: camera, pose, frameLoop, sound, storage, tilt
+│   ├── app/                   fitApp, guidedScan, burst, scanSession
+│   ├── ui/                    view factories: catalog, consent, debug, fit, guide, heightForm, profile, review, scan, settings
+│   └── i18n/                  en.js, id.js, index.js
+├── vendor/mediapipe/          vision_bundle.mjs, wasm/, models/pose_landmarker_full.task, SHA256SUMS
+├── scripts/
+│   ├── vendor-mediapipe.mjs   vendor, download models, write or check hashes
+│   └── copy-vendor-to-dist.mjs copy and hash-check wasm and models into dist/
+├── test/                      node:test files (*.test.js), test/core/, test/data/, test/helpers/
+├── validation/                protocols, checklists, readings CSVs, report/calibrate/study scripts, results
+├── vite.config.js             basic-ssl, ws off, fs.deny for validation and .planning
+├── package.json               exact-pinned devDependencies and scripts
+├── README.md                  run on the LAN, debug flags
+└── FILES.md                   short file map
 ```
-Prototype Capstone/
-├── index.html           # Single page; CDN + local script tags; all DOM regions
-├── css/
-│   └── style.css        # All styles (single stylesheet)
-├── js/
-│   ├── products.js      # Global PRODUCTS mock database
-│   ├── api.js           # Global api: mock async fetch + recommender
-│   ├── ar.js            # Controller: camera, state machine, MediaPipe, canvas, UI rendering, localStorage
-│   └── main.js          # Placeholder comment only (not loaded)
-├── assets/              # Product card and overlay PNGs
-├── docs/
-│   └── plans/           # Empty
-├── FILES.md             # Hand-maintained file descriptions
-├── GreenWear (1).pdf    # Implementation plan reference document
-├── .gitignore           # Ignores .DS_Store, .gemini/, .agents/
-└── .planning/
-    └── codebase/        # Generated codebase maps
-```
-
-## Directory Purposes
-
-**`css/`:**
-- Purpose: Styling.
-- Contains: `style.css` (flat rule blocks by component: body/header/main, `.workspace-grid`, `.camera-panel`, `.camera-hud`, `.garment-card`, `.dashboard-card`, `.stat-circle`, badges).
-- Key files: `css/style.css`
-
-**`js/`:**
-- Purpose: All application logic, loaded as classic scripts.
-- Contains: Data (`products.js`), mock service (`api.js`), controller (`ar.js`), unused placeholder (`main.js`).
-- Key files: `js/ar.js`, `js/api.js`, `js/products.js`
-
-**`assets/`:**
-- Purpose: Garment images referenced by `image` and `overlayImage` in `js/products.js`.
-- Contains: `cotton_tee_card.png`, `cotton_tee_overlay.png`, `linen_shirt_card.png`, `linen_shirt_overlay.png`.
-- Note: `hemp_jacket_*`, `denim_dress_*` and `wrap_dress_*` PNGs are referenced by `js/products.js` but absent.
-
-**`docs/plans/`:**
-- Purpose: Reserved for plan documents; currently empty.
-
-## Key File Locations
-
-**Entry Points:**
-- `index.html`: Page entry; script order `products.js`, `api.js`, `ar.js`.
-- `js/ar.js`: Runtime bootstrap via `DOMContentLoaded` handler.
-
-**Configuration:**
-- None. No `package.json`, no bundler or build config, no linter config.
-- `.gitignore`: Ignored paths only.
-
-**Core Logic:**
-- `js/ar.js`: Lifecycle, state machine (`STATE_*`), `initCamera`, `startMediaPipe`, `onResults`, `drawGarmentOverlay`, `drawSkeleton`, `renderWardrobe`, history helpers.
-- `js/api.js`: `fetchProductById`, `recommendOutfit`.
-- `js/products.js`: `PRODUCTS` data.
-
-**Testing:**
-- Not detected. No test files or test runner.
-
-**Documentation:**
-- `FILES.md`: File-by-file descriptions (keep in sync when adding files).
-
-## Naming Conventions
-
-**Files:**
-- Lowercase, single word, by role: `js/products.js`, `js/api.js`, `css/style.css`.
-- Assets: `<slug>_card.png` and `<slug>_overlay.png` (underscore-separated), for example `assets/linen_shirt_card.png`.
-
-**Directories:**
-- Lowercase, short: `css/`, `js/`, `assets/`, `docs/`.
-
-**Code identifiers:**
-- Product ids: kebab-case (`ecovero-linen-shirt`).
-- DOM ids and CSS classes: kebab-case (`#btn-start-camera`, `.garment-card`, `.hud-status`).
-- JS variables and functions: camelCase (`activeProduct`, `triggerScanAndLoad`).
-- JS constants: UPPER_SNAKE (`PRODUCTS`, `STATE_TRACKING`).
-- Button ids use `btn-` prefix; HUD/feedback elements use descriptive names (`scan-feedback-banner`, `tracking-status-badge`).
-- Colors in product data are lowercase hex strings from the palette `#4f772d`, `#f5ebe0`, `#6b705c`, `#2a6f97`, `#bc6c25`.
 
 ## Where to Add New Code
+- New pure calculation or rule: `src/core/<name>.js` with a test in `test/core/<name>.test.js` written first.
+- New browser API use: a `createX` adapter in `src/platform/` with injectable globals and a test with fakes.
+- New screen or panel: `src/ui/<name>View.js` factory plus markup in `index.html` with `data-i18n` keys.
+- New user-facing string: the same key in `src/i18n/en.js` and `src/i18n/id.js`, plus the expected-key list in `test/i18n.parity.test.js`.
+- New garment: chart in `src/data/colourboxCharts.js` (named fields), entry in `src/data/catalog.js`.
+- New tunable threshold: the existing frozen table (`QUALITY`, `AUTO_LOCK`, `CALIBRATION`) with an ASSUMED note.
+- New validation analysis: `validation/<name>.mjs` importing pure core modules, with `test/validation.<name>.test.js`.
 
-**New product:**
-- Append an object to `PRODUCTS` in `js/products.js` with all existing fields.
-- Add `assets/<slug>_card.png` and `assets/<slug>_overlay.png` (or leave `overlayImage: ""` for the color-block fallback).
-- Use `category` of `Top`, `Bottom`, `Dress` or `Outer`; the catalog grid and overlay preload pick it up automatically.
-- A new category also needs icon handling in `js/ar.js` (three places) and possibly special sizing in `drawGarmentOverlay`.
-
-**New recommendation rule or API method:**
-- Implementation: `js/api.js`, returning a Promise with simulated latency.
-- Call from `js/ar.js`.
-
-**New UI region:**
-- Markup: `index.html` (inside `.dashboard-panel` or `.camera-panel`).
-- Styles: `css/style.css`.
-- Render and event wiring: inside the `DOMContentLoaded` closure in `js/ar.js`, next to related helpers (render helpers near `updateDashboardDetails`, listeners in the "Hook up Buttons" block at the end).
-
-**New script file:**
-- Add a `<script>` tag in `index.html` after `js/products.js` and `js/api.js` if it uses their globals; place it before `js/ar.js` only if `ar.js` depends on it.
-- `js/main.js` exists as an unloaded placeholder; add its tag before using it.
-
-**Utilities:**
-- No shared utility module exists; define helpers inside the `js/ar.js` closure or create a new global script loaded before it.
-
-**Running locally:**
-- Serve the folder over `http://localhost` (for example `python3 -m http.server`); opening `index.html` via `file://` may block camera access. Internet access is required for the MediaPipe CDN.
-
-## Special Directories
-
-**`.planning/codebase/`:**
-- Purpose: Generated codebase map documents.
-- Generated: Yes.
-- Committed: Not determined (the project root is not currently a git repository).
-
-**`docs/plans/`:**
-- Purpose: Plan documents.
-- Generated: No.
-- Committed: Not applicable (empty).
-
-**`.gemini/`, `.agents/`:**
-- Purpose: Tool directories excluded via `.gitignore`.
-- Generated: Yes.
-- Committed: No.
+## Not Tracked
+- `node_modules/`, `dist/`, the heavy model, `validation/private/`, `*.session.json`, photos and videos (`.gitignore`).
 
 ---
 
-*Structure analysis: 2026-10-02*
+*Structure analysis: 2026-10-13*

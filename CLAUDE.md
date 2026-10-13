@@ -1,4 +1,5 @@
 <!-- GSD:project-start source:PROJECT.md -->
+
 ## Project
 
 **Size Fit Scanner (working title)**
@@ -19,238 +20,270 @@ It replaces the earlier GreenWear direction (AR tag scanning, sustainability inf
 - **Scope**: Tops only, starting with one plain white T-shirt — keeps the first version narrow
 - **Accuracy**: Per-measurement targets against tape (shoulder about 2.5 cm, chest about 3.5 cm plus size agreement) — this is the bar for "done", validated on team members; a blanket 2-3 cm for every measurement is not realistic for this pipeline
 - **Language**: English and Indonesian UI — existing strings are Indonesian
+
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:codebase/STACK.md -->
+
 ## Technology Stack
 
 ## Languages
-- JavaScript (vanilla, ES2015+ syntax, no modules, no transpilation) - all application logic in `js/ar.js`, `js/api.js`, `js/products.js`
-- HTML5 - single page `index.html` (`<html lang="id">`, UI copy is in Indonesian)
-- CSS3 - single stylesheet `css/style.css` (501 lines)
-- None. `js/main.js` is a one-line comment placeholder and is not loaded by `index.html`.
+
+- JavaScript ES modules (`"type": "module"` in `package.json`), no TypeScript, no transpilation beyond the Vite build.
+- HTML5: one page, `index.html`. `<html lang>` is set at runtime by `initLocale` in `src/main.js`.
+- CSS3: one stylesheet, `css/style.css`. No preprocessor, no CSS custom properties.
+- Node.js scripts (`.mjs`) for tooling: `scripts/` and `validation/`.
+
 ## Runtime
-- Modern desktop/mobile browser (client-side only). No Node.js, no server runtime.
-- Requires `navigator.mediaDevices.getUserMedia` (webcam), Canvas 2D, `localStorage`, `requestAnimationFrame`, and WebAssembly/WebGL (needed by MediaPipe Pose).
-- Camera access requires a secure context: `https://` or `http://localhost`. Opening `index.html` via `file://` may block camera access depending on the browser.
-- None. No `package.json`, no lockfile, no `node_modules`.
-- Dependencies are loaded by `<script>` tags from a CDN.
-## Frameworks
-- No application framework. Plain DOM manipulation (`document.getElementById`, `style.display` toggling) in `js/ar.js`.
-- MediaPipe Pose (`@mediapipe/pose`, version unpinned, latest on jsDelivr) - body landmark detection used to place garment overlay images. Instantiated in `startMediaPipe()` in `js/ar.js` with `modelComplexity: 1`, `smoothLandmarks: true`, `minDetectionConfidence: 0.5`, `minTrackingConfidence: 0.5`.
-- MediaPipe `camera_utils` (version unpinned) - loaded in `index.html` but the `Camera` helper is not used. `js/ar.js` drives frames itself with a `requestAnimationFrame` loop throttled to 30 fps that calls `poseInstance.send({ image: webcamElement })`.
-- Not detected. No test runner, test files, or test config.
-- None. No bundler, linter, formatter, or dev server config. Files are served as-is.
-## Key Dependencies
-- `@mediapipe/pose` via `https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js` (`index.html` line 11) - pose tracking. The app cannot do AR overlay if the CDN is unreachable.
-- Pose model and WASM files fetched at runtime via `locateFile` from `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}` (`js/ar.js` line 361).
-- `@mediapipe/camera_utils` via `https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js` (`index.html` line 10) - loaded but unused.
-- Both CDN `<script>` tags use `crossorigin="anonymous"`. No Subresource Integrity hashes and no version pins.
+
+- Client-side only, in a modern phone or laptop browser. No backend, no server runtime.
+- Browser APIs used: `getUserMedia`, Canvas 2D, WebAssembly, `localStorage` (only through `src/platform/storage.js`), `requestVideoFrameCallback` (falls back to `requestAnimationFrame`), Web Audio, `DeviceOrientationEvent`.
+- Secure context required for the camera: `https://` or `http://localhost`. `src/core/preflight.js` reports `insecure-context`, `no-camera-api` and `no-webassembly` at startup; manual entry still works.
+
+## Tooling
+
+- Node `>=22.12.0` (`engines` in `package.json`).
+- devDependencies, exact-pinned (no `^` or `~`, guarded by `test/vendor.test.js`):
+
+| Package | Version | Role |
+|---------|---------|------|
+| `vite` | 8.3.2 | dev server and production build (`base: "./"`) |
+| `@vitejs/plugin-basic-ssl` | 2.3.0 | self-signed HTTPS so phones on the LAN get camera access |
+| `@mediapipe/tasks-vision` | 1.0.1 | source of the vendored pose files |
+
+- No runtime dependencies. No install-time scripts (guarded by `test/vendor.test.js`).
+- No linter, formatter or bundler config beyond `vite.config.js`.
+
+## Scripts (`package.json`)
+
+- `dev`: `vite --host` (HTTPS on the LAN).
+- `build`: `vite build && node scripts/copy-vendor-to-dist.mjs` (copies wasm and models into `dist/` and re-checks SHA-256).
+- `demo`: `npm run build && vite preview --host`.
+- `preview`: `vite preview --host`.
+- `test`: `node --test "test/**/*.test.js"`.
+- `vendor`: `node scripts/vendor-mediapipe.mjs` (copy from `node_modules`, download models, write hashes).
+- `vendor:check`: `node scripts/vendor-mediapipe.mjs --check` (verify `vendor/mediapipe/SHA256SUMS`).
+
+## Pose Engine
+
+- MediaPipe `PoseLandmarker` from `@mediapipe/tasks-vision` 1.0.1, self-hosted in `vendor/mediapipe/`.
+- `vendor/mediapipe/vision_bundle.mjs` is imported by `src/platform/pose.js` and bundled by Vite.
+- `vendor/mediapipe/wasm/` and `vendor/mediapipe/models/` are loaded at runtime from page-relative URLs (`new URL(..., document.baseURI)`).
+- `vendor/mediapipe/SHA256SUMS` lists the bundle, four wasm files and both models; `vendor:check` and the build verify them.
+- Model `pose_landmarker_full.task` by default and tracked in git; `pose_landmarker_heavy.task` is optional (`?model=heavy`), downloaded with `--heavy` and git-ignored.
+- Options: `numPoses: 1`, `outputSegmentationMasks: true`, running mode `VIDEO`, delegate `CPU` (or `GPU` by flag).
+
+## Content Security Policy
+
+- Meta CSP in `index.html`: `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'`.
+- No third-party origins, no CDN, no inline scripts or styles.
+
 ## Configuration
-- No environment variables, no `.env` files, no runtime config files.
-- Tunable constants are hard-coded in source: MediaPipe options and 30 fps throttle in `js/ar.js`; webcam constraints (ideal 640x480, `facingMode: "user"`, `audio: false`) in `js/ar.js`; simulated latencies in `js/api.js` (1000 ms product fetch, 500 ms recommendation) and `js/ar.js` (2200 ms scan delay).
-- Product data lives in the `PRODUCTS` global array in `js/products.js`.
-- Script load order in `index.html` matters because there are no modules: `js/products.js`, then `js/api.js`, then `js/ar.js`.
-- None. Static assets: `css/style.css`, `assets/*.png` (`cotton_tee_card.png`, `cotton_tee_overlay.png`, `linen_shirt_card.png`, `linen_shirt_overlay.png`).
-- CSS uses a system font stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica...`). No web fonts, no CSS custom properties, one `@media (max-width: 768px)` breakpoint, `@keyframes spin` and `pulse`.
-- `.gitignore` ignores `.DS_Store`, `.gemini/`, `.agents/`.
+
+- No environment variables, no `.env` files (`import.meta.env` is forbidden in `src/` by `test/privacy.static.test.js`).
+- URL flags, read once in `src/main.js`:
+
+| Flag | Values | Effect |
+|------|--------|--------|
+| `debug` | `1` | shows the debug section, skeleton, mask, live readings and fps |
+| `model` | `heavy` | loads the heavy model instead of full |
+| `camera` | `rear` | rear camera (`environment`), no mirroring |
+| `delegate` | `gpu` | GPU delegate instead of CPU |
+
+- Tunable constants live in pure modules: `QUALITY` in `src/core/quality.js`, `AUTO_LOCK` in `src/core/autoLock.js`, `CALIBRATION` in `src/core/calibration.js`, ease and diff windows in `src/core/fit.js`, burst sizes in `src/app/burst.js`, frame rate (`targetFps = 12`) in `src/platform/frameLoop.js`.
+- `vite.config.js`: `base: "./"`, `basicSsl()`, `server.host: true`, `server.ws: false`, `server.fs.deny` adds `**/validation/**` and `**/.planning/**`.
+
 ## Platform Requirements
-- Any static file server (for example `python3 -m http.server` or an editor live-server) serving the project root on `localhost`. Internet access is needed to load MediaPipe from jsDelivr.
-- A webcam for the AR flow. Without one, the "skip" path (`bypassCamera()` in `js/ar.js`) still shows product data.
-- Deployment target not detected. Any static host over HTTPS would work. No server-side component exists.
+
+- Development: `npm install`, then `npm run dev`; open the printed `https://<lan-ip>:5173` on the phone and accept the self-signed certificate.
+- Demo: `npm run demo` builds `dist/` and serves it with `vite preview --host` over HTTPS.
+- `dist/` also runs from any plain static server over HTTPS or localhost; all paths are relative.
+- No internet needed at runtime once installed; the model download happens only in `npm run vendor`.
+
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
+
 ## Conventions
 
 ## Naming Patterns
-- Lowercase, single-word or snake_case names: `js/products.js`, `js/api.js`, `js/ar.js`, `css/style.css`.
-- Asset files are `snake_case` with a role suffix: `assets/linen_shirt_card.png` (catalog card image) and `assets/linen_shirt_overlay.png` (AR overlay image). Follow `<garment>_card.png` and `<garment>_overlay.png` for new products.
-- camelCase verbs: `getHistory`, `saveToHistory`, `renderWardrobe`, `selectProduct`, `triggerScanAndLoad`, `loadProductDirect`, `updateDashboardDetails`, `drawGarmentOverlay` (`js/ar.js`).
-- API methods are camelCase on the `api` object: `fetchProductById`, `recommendOutfit` (`js/api.js`).
-- camelCase for mutable state and DOM references: `activeProduct`, `hasBypassed`, `poseInstance`.
-- DOM element variables end in a role suffix: `webcamElement`, `canvasElement`, `startCameraBtn`, `skipCameraFallbackBtn`, `trackingStatusBadge`, `cameraHud`.
-- State-machine constants are UPPER_SNAKE with a `STATE_` prefix: `STATE_IDLE`, `STATE_SCANNING`, `STATE_LOADING`, `STATE_TRACKING` (`js/ar.js`).
-- The global product list is the UPPER_SNAKE constant `PRODUCTS` (`js/products.js`).
-- Product `id` values are kebab-case strings: `"ecovero-linen-shirt"`, `"hemp-canvas-pants"`.
-- `category` is one of `"Top"`, `"Bottom"`, `"Dress"`, `"Outer"` (capitalised string). Do not introduce other spellings, because `compatibleCategories` and the icon mapping compare against these exact strings.
-- Colours are lowercase 6-digit hex strings (`"#4f772d"`), with the colour name in `colorName`.
-- HTML ids and classes are kebab-case. Buttons use a `btn-` prefix (`btn-start-camera`, `btn-clear-history`). Dashboard fields use an `eco-` prefix (`eco-name`, `eco-rating`). Recommendation fields use `mix-`.
-- `localStorage` key is `greenwear_history` (snake_case, app-prefixed).
+
+- Files: camelCase `.js` modules named after their export (`autoLock.js`, `guidedScan.js`, `reviewView.js`); tooling scripts are kebab-case `.mjs` (`vendor-mediapipe.mjs`).
+- Functions: camelCase verbs (`measureView`, `checkFrame`, `stepLock`, `applyRescan`, `preflightIssues`).
+- Factories: `createX` returning an object of functions (`createCamera`, `createPose`, `createGuidedScan`, `createReviewView`).
+- Constants and tunable tables: UPPER_SNAKE, frozen where shared (`QUALITY`, `AUTO_LOCK`, `CALIBRATION`, `PREFLIGHT_CODES`, `CATALOG`).
+- Measurement keys end in the unit: `shoulderCm`, `chestCm`, `waistCm`, `torsoCm`, `armCm`, `heightCm`, `inferenceMs`.
+- Reason and error codes are kebab-case strings (`not-full-body`, `insecure-context`, `no-camera`).
+- HTML ids and classes are kebab-case; buttons use a `btn-` prefix (`btn-rescan`, `btn-camera-start`).
+- Storage keys are `sfs.`-prefixed (`sfs.state.v1`, `sfs.locale`).
+- Garment ids are kebab-case (`colourbox-plain-white-tee`).
+
 ## Code Style
-- 2-space indentation.
-- Double quotes for strings, backticks for interpolation.
-- Semicolons always.
-- `const` / `let` only, never `var`.
-- Arrow functions for callbacks, `function` declarations for named helpers inside `ar.js`.
-- Trailing whitespace exists in places (blank indented lines in `js/ar.js`); it is not significant.
-- Not detected. No `.eslintrc*`, `biome.json` or `.prettierrc`.
-## Script Loading and Module Design
-- Plain classic `<script>` tags at the end of `<body>` in `index.html`, in dependency order:
-- The MediaPipe libraries (`camera_utils.js`, `pose.js`) load from jsDelivr in `<head>` and provide the global `Pose`.
-- No ES modules, `import` or `export`. Shared values are globals: `PRODUCTS` (top-level `const`) and `window.api` (`js/api.js` ends with `window.api = api;`).
-- New data modules must be added to `index.html` before `js/ar.js`.
-- `js/main.js` contains only a comment and is not referenced by `index.html`. Do not rely on it.
-- All application logic in `js/ar.js` lives inside a single `document.addEventListener("DOMContentLoaded", () => { ... })` closure. State is shared mutable `let` variables at the top of that closure (`activeProduct`, `showSkeleton`, `isMirrored`, `trackingActive`, `activeStream`, `hasBypassed`, `poseInstance`, `currentState`).
-- Sections inside the closure are marked with numbered comments: `// 1. Render Catalog Selector Grid`, `// 2. Camera Access Control & Bypass`, `// 3. MediaPipe Pose tracking`, `// 4. Hook up Buttons`. Keep that order when adding code.
-## Async Patterns
-- Simulated backend latency uses `new Promise` plus `setTimeout` (`js/api.js`): `fetchProductById` waits 1000 ms, `recommendOutfit` waits 500 ms. `triggerScanAndLoad` in `js/ar.js` waits 2200 ms to simulate a tag scan.
-- Consumers use `.then()` / `.catch()` chains. `async`/`await` is not used.
-- `fetchProductById` returns a deep copy (`JSON.parse(JSON.stringify(product))`) so callers cannot mutate `PRODUCTS`.
-- Guard against stale async results by comparing the active product after every delay:
-- Camera and MediaPipe use `navigator.mediaDevices.getUserMedia(...).then(...).catch(...)` and `requestAnimationFrame` loops throttled to 30 fps.
+
+- 2-space indentation, double quotes, semicolons always, `const` / `let` only.
+- Named exports only; no default exports except the i18n dictionaries (`en.js`, `id.js`).
+- `async` / `await` in platform and app code; core code is synchronous.
+- Short `//` comments state intent and cite decision ids (`P4-D16`, `D-09`, `PRIV-02`).
+- JSDoc (`@param`, `@returns`) on core exports and platform factories.
+- Assumed numbers carry an inline note: `// starting value (ASSUMED), confirm on real captures`.
+
+## Module Rules
+
+- Relative imports only; no bare imports in `src/` (the vendored bundle is imported by relative path).
+- `src/core/` is pure: no browser globals, no clock, no outer-layer imports (`test/core.purity.test.js`).
+- Browser access goes through `src/platform/` adapters with injectable dependencies (`createTiltSensor({ target, OrientationEvent })`, `createSound({ AudioContextCtor })`, `createStorage(storageObj)`).
+- UI factories take their dependencies as one object: `createXView({ doc, t, formatNumber, onX })`.
+- Only `src/platform/storage.js` touches `localStorage` (`test/privacy.static.test.js`).
+- No network APIs, no `import.meta.env`, no hard-coded `http://` or `https://` in `src/`.
+
+## DOM Rules
+
+- Elements are found with `getElementById` and checked before use.
+- Text is set with `textContent` only; `innerHTML`, `outerHTML`, `insertAdjacentHTML` and `document.write` are forbidden in `src/`.
+- Lists are built with `createElement` and `append`.
+- Visibility is toggled with the `hidden` attribute (`setAttribute("hidden", "")` / `removeAttribute("hidden")`); state classes use `classList.toggle`.
+- No inline styles from JS; no canvas `toDataURL` / `toBlob`.
+
+## i18n Rules
+
+- Every user-facing string is a key in both `src/i18n/en.js` and `src/i18n/id.js`.
+- `test/i18n.parity.test.js` checks identical key sets, matching `{param}` names and no empty values.
+- Static markup uses `data-i18n` and `data-i18n-placeholder`; `applyTranslations(document)` fills them.
+- Views re-render on the `#language-select` change so dynamic text follows the language.
+- Numbers go through `formatNumber` (locale `en-US` or `id-ID`).
+- Debug labels (engine info keys such as `inference ms`, `fps`) stay untranslated English.
+
 ## Error Handling
-- Promise rejections are created with `new Error(\`Product not found: ${id}\`)` in `js/api.js`.
-- Consumers log with `console.error("<context>:", err)` and, where there is a visible banner, set a user-facing message: `scanFeedback.textContent = "⚠️ Gagal mengambil data produk.";` (`js/ar.js`).
-- Camera permission failure shows the fallback panel (`fallbackUI.style.display = "flex"`) and sets the status badge to `"Kamera Ditolak"`.
-- Defensive DOM checks are used for optional elements: `if (!drawer) return;`, `if (grid) ...`, `if (!circle || !text) return;`.
-- `recommendOutfit` never rejects. It falls back in order: wardrobe match, catalog match by category and colour, catalog match by category only, first non-current product.
-## Logging
-- Log only caught errors. No debug or info logging.
-## Comments
-- Short `//` comments describe intent for blocks and rules (`// Rule helper to check...`, `// 1. Primary: Search in scanned history (Wardrobe)`).
-- Data files annotate units and meaning inline: `waterUsage: 120, // Liters used (vs 2700 standard)`, `waterSavings: 95, // % savings`, `carbonFootprint: 1.2, // kg CO2`. Keep those annotations on new products.
-- HTML uses `<!-- ... -->` comments to label every major block, including the flowchart reference (`<!-- Scan feedback banner (Flowchart Step 5a) -->`).
-- Used only on the `api` methods in `js/api.js` with `@param {type} name - description` and `@returns {Promise<Object>}`. Add JSDoc to any new `api` method; `js/ar.js` internal helpers are undocumented.
-## Function Design
-## DOM and Rendering
-- Elements are fetched with `document.getElementById(...)`. Lists are rendered by assigning `innerHTML` from `map(...).join("")` template strings (`renderWardrobe`, catalog grid render in `js/ar.js`), then event listeners are re-attached with `querySelectorAll(...).forEach(...)` and `e.currentTarget.getAttribute("data-id")`.
-- Visibility is toggled by assigning `element.style.display` to `"none"`, `"block"` or `"flex"`. Initial hidden state is set inline in `index.html` (`style="display: none;"`).
-- Status badge state uses `className` replacement: `trackingStatusBadge.className = "hud-status active";`.
-- Use `textContent` for plain text. Product data is interpolated unescaped into `innerHTML` templates, which is acceptable only because `PRODUCTS` is static local data. Do not feed user-supplied strings into those templates.
-## CSS Conventions (`css/style.css`)
-- Plain CSS, no preprocessor, no custom properties (`var(--...)` is not used). Colours are hardcoded hex values or `rgba(...)`.
-- Class names are kebab-case and component-prefixed: `.camera-panel`, `.camera-bracket`, `.hud-btn`, `.garment-card`, `.dashboard-card`, `.mix-match-card`, `.badge-ownership`.
-- State modifiers are chained classes: `.hud-status.active`, `.garment-card.active`, `.badge-ownership.owned` / `.suggestion`.
-- The only id-based selectors are `video#webcam` and `canvas#ar-canvas`.
-- Layout uses flexbox, `gap`, `inset`, `aspect-ratio`; spacing and font sizes are in `rem`; borders in `px`.
-- The file is divided into sections with `/* Section title */` comments, in page order (header, camera panel, HUD, covers, dashboard, catalog, stats, details, mix and match, buttons, wardrobe, badges).
-- Animations: `@keyframes spin` and `@keyframes pulse`. One responsive breakpoint: `@media (max-width: 768px)`.
-## Language and Copy
-- `index.html` declares `<html lang="id">`. User-facing text is Bahasa Indonesia (`"Aktifkan Kamera AR"`, `"Lemari Saya (Scanned)"`).
-- Code identifiers, comments and product data (`name`, `description`, `careGuide`) are English.
-- Emoji are used as icons (`📷`, `⚠️`, `👕`, `👖`, `👗`, `🧥`).
-## Known Inconsistencies (do not copy these)
-- Category-to-emoji mapping is duplicated three times in `js/ar.js` (`renderWardrobe`, catalog render block, `updateRecommendationDetails`). Prefer a single lookup helper.
-- Some UI strings are English inside otherwise Indonesian copy: `"Scanning Tag..."`, `"Tracking Aktif"` (mixed), `"In Wardrobe"`, `"Catalog Suggestion"` in `js/ar.js` and `index.html`.
-- Inline `style="..."` attributes appear 15 times in `index.html` and inside JS-generated markup (`scanned-color-dot`). Prefer classes in `css/style.css`.
-- `updateCirclePercent(circleId, textId, percentValue, maxValue)` in `js/ar.js` ignores `maxValue`; `maxWaterSaved` and `maxCarbonSaved` are passed but unused.
-- `scanFeedback.innerHTML` is assigned a static string in `onResults` where `textContent` is used everywhere else.
-- `products.js` references image files that are not in `assets/`: `hemp_jacket_*`, `denim_dress_*`, `wrap_dress_*`. Only `cotton_tee_*` and `linen_shirt_*` exist. Several products reuse another product's card image as a placeholder, and products with `overlayImage: ""` render a green placeholder block in `drawGarmentOverlay`.
+
+- Log caught errors with context: `console.error("Pose engine load failed:", err)`.
+- Show users a translated message by key (`camera.error.<code>`, `scan.reason.<code>`), never a raw error.
+- Pure functions return result objects (`{ ok: true }` / `{ ok: false, code }`) instead of throwing for expected failures; throw only for programmer errors (`Unknown calibration key`).
+- Storage read and write errors fall back silently to empty state or memory.
+
+## Tests
+
+- `node:test` with `node:assert/strict`; files in `test/` named `*.test.js`, core unit tests in `test/core/`.
+- Core logic is written test-first (RED commit, then GREEN commit).
+- Static guard tests protect purity, privacy, vendoring, i18n parity and the build.
+- Camera, sound, tilt and mask behaviour on phones is verified only on real devices (`validation/DEVICE-CHECKLIST.md`).
+
+## CSS
+
+- `css/style.css` uses hardcoded colours and no CSS custom properties; do not assume `var(--...)` tokens exist.
+- No inline `style` attributes (CSP `style-src 'self'`).
+
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
+
 ## Architecture
 
 ## System Overview
-```text
-```
-## Component Responsibilities
-| Component | Responsibility | File |
-|-----------|----------------|------|
-| Page shell | DOM skeleton, Indonesian UI strings, CDN script tags, local script load order | `index.html` |
-| Styles | Layout grid, camera overlays, HUD, SVG stat rings, cards, badges | `css/style.css` |
-| Product database | Global `PRODUCTS` array of 10 garments with eco metrics and compatibility rules | `js/products.js` |
-| Mock API | `api.fetchProductById` (1000 ms delay) and `api.recommendOutfit` (500 ms delay) | `js/api.js` |
-| Controller | Camera access, scan state machine, MediaPipe loop, canvas drawing, dashboard rendering, wardrobe history | `js/ar.js` |
-| Placeholder | One-line comment; not loaded by the page | `js/main.js` |
-| Image assets | Product card and overlay PNGs | `assets/` |
-## Pattern Overview
-- Script order in `index.html` is a hard dependency: `js/products.js` (defines `PRODUCTS`), then `js/api.js` (defines `api` and `window.api`), then `js/ar.js` (consumes both).
-- All backend behavior is simulated with `setTimeout` promises; `js/api.js` is shaped so it can be swapped for real `fetch` calls.
-- Rendering is imperative: `innerHTML` templates for card grids, `textContent` for dashboard fields, `canvas` 2D for AR.
-- Two operating modes: camera mode (scan simulation plus pose tracking) and bypass mode (`hasBypassed`, direct data view, placeholder canvas).
+
+- `index.html` (CSP, markup, `data-i18n` keys) loads `src/main.js`.
+- `src/main.js` wires flags, preflight, camera, pose, guided scan, review and rescan, and calls `initFitApp`.
+- `src/app/fitApp.js` owns profile, catalog, fit check, history and settings; `guidedScan.js`, `burst.js`, `scanSession.js` run the scan.
+- `src/platform/*` wraps browser APIs; `src/ui/*` renders with `textContent`; `src/core/*` holds pure maths and state (charts from `src/data/*` are passed in as arguments); `src/i18n/*` holds en and id strings.
+
 ## Layers
-- Purpose: Static markup and styling; all dynamic regions are filled by `js/ar.js`.
-- Location: `index.html`, `css/style.css`
-- Contains: Camera panel (`#camera-viewport`, `#webcam`, `#ar-canvas`, `#camera-hud`, cover/loading/fallback overlays), `#catalog-drawer`, `#wardrobe-drawer`, `#dashboard-details`.
-- Depends on: Nothing at runtime except CDN scripts.
-- Used by: `js/ar.js` via `document.getElementById`.
-- Purpose: Orchestrate lifecycle, state, rendering and tracking.
-- Location: `js/ar.js`
-- Contains: Closure-scoped state (`activeProduct`, `showSkeleton`, `isMirrored`, `trackingActive`, `activeStream`, `hasBypassed`, `poseInstance`, `currentState`), render helpers, MediaPipe setup, canvas drawing, event hooks.
-- Depends on: Globals `PRODUCTS`, `api`, `Pose`; browser APIs `navigator.mediaDevices`, `localStorage`, `requestAnimationFrame`.
-- Used by: Loaded last from `index.html`.
-- Purpose: Simulate server lookup and outfit recommendation.
-- Location: `js/api.js`
-- Contains: `fetchProductById(id)` returns a JSON deep copy or rejects with `Product not found`. `recommendOutfit(currentProduct, historyIds)` resolves a garment plus `inWardrobe` flag.
-- Depends on: Global `PRODUCTS`.
-- Used by: `js/ar.js` (`triggerScanAndLoad`, `loadProductDirect`, `clearHistory`).
-- Purpose: Product records and scan history.
-- Location: `js/products.js`; `localStorage` key `greenwear_history` (JSON array of product ids).
-- Contains: Product fields `id`, `name`, `category` (Top/Bottom/Dress/Outer), `description`, `image`, `overlayImage`, `material`, `waterUsage`, `waterSavings`, `carbonFootprint`, `carbonSavings`, `ecoRating`, `careGuide`, `color` (hex), `colorName`, `compatibleCategories`, `compatibleColors`.
-- Used by: `js/api.js`, `js/ar.js`.
-## Data Flow
-### Primary Request Path (camera mode)
-### Product selection and bypass flow
-### Recommendation rules (`js/api.js:27`)
-- Scan state machine constants `STATE_IDLE`, `STATE_SCANNING`, `STATE_LOADING`, `STATE_TRACKING` (`js/ar.js:33-37`); `currentState` starts `idle`.
-- Race guard: async steps abort when `activeProduct.id !== product.id`.
-- Wardrobe history persists in `localStorage`; everything else is in-memory closure variables.
-- `clearHistory` removes the key, re-renders, and re-runs recommendation for the active product.
-## Key Abstractions
-- Purpose: Single source of truth for garment data and matching rules.
-- Examples: `js/products.js`
-- Pattern: Plain object literals in a global array; ids are kebab-case strings.
-- Purpose: Gate overlay drawing so garments render only after "scan" and data load complete.
-- Examples: `js/ar.js` (`triggerScanAndLoad`, `onResults`)
-- Pattern: String constants plus a mutable `currentState`.
-- Purpose: Map pose landmarks to a rotated, scaled image on the canvas.
-- Examples: `js/ar.js` `drawGarmentOverlay`
-- Pattern: Landmarks 11/12 (shoulders) set anchor, width and rotation; 23/24 (hips) set height; `Dress` category uses larger factors (2.1x width, 2.1x height ratio). Falls back to a translucent green block labelled with the product name when `overlayImage` is empty or not loaded.
-- Purpose: Async boundary mimicking a server.
-- Examples: `js/api.js`
-- Pattern: Promise-returning methods on a global `api` object with simulated latency.
-## Entry Points
-- Location: `index.html`
-- Triggers: Browser load (must be served from localhost or HTTPS for camera access).
-- Responsibilities: Declares DOM, loads CDN and local scripts.
-- Location: `js/ar.js:1` (`DOMContentLoaded` handler)
-- Triggers: DOM ready.
-- Responsibilities: Caches elements, preloads overlay images into `garmentImages`, renders catalog grid, wires buttons (`js/ar.js:534-570`), calls `renderWardrobe()` (`js/ar.js:573`).
-## Architectural Constraints
-- **Threading:** Single-threaded main thread using `setTimeout` and `requestAnimationFrame`. MediaPipe manages its own internal workers/WASM.
-- **Global state:** `PRODUCTS` (`js/products.js`), `api` / `window.api` (`js/api.js`), `localStorage["greenwear_history"]`. All other state is closure-scoped in `js/ar.js`.
-- **Circular imports:** None; there are no modules.
-- **Load order:** `js/products.js`, `js/api.js`, `js/ar.js` must stay in this order in `index.html`.
-- **Secure context:** `getUserMedia` requires `localhost` or HTTPS.
-- **Network dependency:** MediaPipe code and model files come from `https://cdn.jsdelivr.net/npm/@mediapipe/` (`js/ar.js:361`, `index.html`).
-- **Language:** UI strings are Indonesian (`<html lang="id">`).
-## Anti-Patterns
-### Duplicated category icon mapping
-### Stacking listeners and no stream teardown
-### Product data referencing missing assets
-### Logic coupled to global script order
+
+| Layer | Location | Contains | May import |
+|-------|----------|----------|------------|
+| Core | `src/core/` | pure measurement, quality gate, auto-lock reducer, calibration, fit, profile state, preflight, review parsing | `src/core/` only (charts arrive as arguments) |
+| Data | `src/data/` | `colourboxCharts.js` (ColourBox size charts), `catalog.js` (`CATALOG`, `CUTS`) | `src/data/` |
+| Platform | `src/platform/` | `camera.js`, `pose.js`, `frameLoop.js`, `sound.js`, `storage.js`, `tilt.js` browser adapters | `src/core/`, `vendor/` |
+| App | `src/app/` | `fitApp.js`, `guidedScan.js`, `burst.js`, `scanSession.js` orchestration | core, data, platform, ui, i18n |
+| UI | `src/ui/` | `createXView` factories: catalog, consent, debug, fit, guide, height form, profile, review, scan, settings | core, i18n (via injected `t`) |
+| i18n | `src/i18n/` | `en.js`, `id.js`, `index.js` (`t`, `formatNumber`, `initLocale`, `setLocale`, `applyTranslations`) | own files |
+| Entry | `src/main.js` | wiring of everything above | all |
+
+- `src/core/` purity is enforced by `test/core.purity.test.js`: no `document`, `window`, `navigator`, `localStorage`, `performance`, `Date.now`, and no imports from platform, ui, app or i18n.
+- Time enters core only as a `t` argument on events (`stepLock`), never from a clock.
+
+## Entry Point
+
+- `index.html` loads `src/main.js` as a module; Vite bundles it.
+- `src/main.js` order: `initLocale(storage.loadLocale() ?? navigator.language)`, `applyTranslations`, `initFitApp`, read URL flags, `preflightIssues`, then wire camera, pose, frame loop, guided scan, review and buttons.
+- Missing required markup logs `console.error("Page markup is missing a required element.")` and skips the scan wiring.
+
+## Data Flow: Guided Scan to Fit Check
+
+- Height form (`src/ui/heightForm.js`, `validateHeightCm`, 120 to 220 cm) sets `heightCm` in memory only.
+- Consent (`src/ui/consentView.js`) must be accepted once per page load before the camera starts; Accept also unlocks sound and starts tilt (user gesture for iOS). Decline routes to manual entry.
+- `ensurePose()` loads `createPose` lazily; failure shows an engine error and routes to manual entry.
+- `camera.start({ facingMode })` returns `{ ok }` or an error `code` (`denied`, `no-camera`, `busy`, `overconstrained`, `unknown`); failure routes to manual entry.
+- `createFrameLoop` (12 fps) calls `pose.detect` per frame; the mask is requested only in debug or while guiding.
+- `guidedScan.onFrame` runs `checkFrame` (quality gate) and `stepLock` (auto-lock) per frame and keeps only reason codes and body anchors.
+- On lock, `capture(view)` runs `runBurst` (15 frames, 8 ok minimum) -> `readFrame` per frame -> `summariseBurst` -> `scanSession.record`.
+- After front and side, `combineScan` builds the measurements; `maybeOpenReview` stops the camera and opens `reviewView`.
+- Review save -> `fitApp.applyReview` -> `applyRescan` (every measurement replaced; source `scanned` or `edited`) -> `storage.saveState` -> `goToFitCheck`.
+- Fit check: `checkFit({ chart, sizeLabel, preference, body })` and `recommendAll(chestCm, chart)`; each check is added to history with `addHistoryEntry` (newest first, cap 50).
+- Rescan (`#btn-rescan`, `beginRescan`): resets the scan, asks for height when none is set, then restarts the guided scan; saving replaces the old values.
+- Manual fallback: debug capture buttons stop the guided scan and use a 5 s countdown burst.
+
+## Startup Preflight
+
+- `preflightIssues({ secureContext, cameraApi, webAssembly })` returns codes in fixed order; `src/main.js` shows them in `#preflight-status` with `preflight.manual`, re-rendered on language change.
+- Informational only: consent, camera start and manual entry still work.
+
+## State and Storage
+
+- Saved state (`sfs.state.v1`) holds profile name, preference, five measurements with sources, and fit history; `sfs.locale` holds `en` or `id`.
+- Only `src/platform/storage.js` touches `localStorage`; it sanitises on load and save (`sanitiseState`) and falls back to memory when storage is blocked.
+- Height, consent, captured readings and scan session are in memory for the page load only.
+- Settings "delete all" calls `storage.clearAll()` and resets to `emptyState()`.
+
+## Privacy Constraints
+
+- No image, frame, mask or video is stored, exported or sent; only numbers.
+- No network calls at runtime; CSP allows only same-origin resources plus `wasm-unsafe-eval`.
+- `test/privacy.static.test.js` forbids storage, network, export and HTML-injection APIs in `src/` (`localStorage` allowed only in `src/platform/storage.js`).
+- `test/privacy.repo.test.js` checks git tracks no image or video and `.gitignore` blocks photos and recordings.
+- The camera stops on `pagehide` and when the page is hidden, and never restarts by itself.
+
+## Validation Tooling
+
+- `validation/report.mjs` (Phase 1): tape error and size agreement per `validation/PASS-CRITERIA.md`.
+- `validation/calibrate.mjs` (Phase 3): repeatability, tape error and suggested calibration offsets from `phase3-readings.csv`.
+- `validation/study.mjs` (Phase 5): accuracy study against `TARGETS` (shoulder MAE 2.5 cm, chest MAE 3.5 cm) and size agreement; writes `STUDY-RESULTS.md`.
+- Scripts import pure `src/core/` and `src/data/` modules directly in Node.
+
 ## Error Handling
-- Camera denial: `.catch` in `initCamera` shows `#webcam-fallback-ui` and sets the badge to "Kamera Ditolak" (`js/ar.js:318`).
-- API failure during scan: banner text "Gagal mengambil data produk." (`js/ar.js:204`); during direct load, only `console.error` (`js/ar.js:227`).
-- MediaPipe frame errors: `console.error` in the `send` catch (`js/ar.js:381`).
-- No body detected: banner "Tubuh tidak terdeteksi" shown from `onResults`.
-## Cross-Cutting Concerns
+
+- Caught errors are logged with `console.error("<context>:", err)`.
+- User-facing failures set translated text by key (`camera.error.<code>`, `engine.error.load-failed`, `scan.reason.<code>`) and route to manual entry where scanning cannot continue.
+- Fit check failures hide the result instead of showing a wrong one.
+
+## Removed
+
+- The GreenWear AR prototype was removed in 2026-10 and lives only in git history.
+
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
+
 ## Project Skills
 
 No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skills/`, `.cursor/skills/`, `.github/skills/`, or `.codex/skills/` with a `SKILL.md` index file.
 <!-- GSD:skills-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
+
 ## GSD Workflow Enforcement
 
 Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
 
 Use these entry points:
-- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd-debug` for investigation and bug fixing
-- `/gsd-execute-phase` for planned phase work
+
+- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd:debug` for investigation and bug fixing
+- `/gsd:execute-phase` for planned phase work
 
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
 
-
-
 <!-- GSD:profile-start -->
+
 ## Developer Profile
 
 > Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.

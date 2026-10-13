@@ -3,22 +3,16 @@
 **Analysis Date:** 2026-10-13
 
 ## System Overview
-```text
-index.html (CSP, markup, data-i18n keys)
-  -> src/main.js (entry: flags, preflight, camera, pose, guided scan, review)
-       -> src/app/fitApp.js (profile, catalog, fit check, history, settings)
-       -> src/app/guidedScan.js, burst.js, scanSession.js (orchestration)
-       -> src/platform/* (camera, pose, frameLoop, sound, storage, tilt)
-       -> src/ui/* (views, textContent only)
-       -> src/core/* (pure maths and state)  <- src/data/* (charts, catalog)
-       -> src/i18n/* (en, id)
-```
+- `index.html` (CSP, markup, `data-i18n` keys) loads `src/main.js`.
+- `src/main.js` wires flags, preflight, camera, pose, guided scan, review and rescan, and calls `initFitApp`.
+- `src/app/fitApp.js` owns profile, catalog, fit check, history and settings; `guidedScan.js`, `burst.js`, `scanSession.js` run the scan.
+- `src/platform/*` wraps browser APIs; `src/ui/*` renders with `textContent`; `src/core/*` holds pure maths and state (charts from `src/data/*` are passed in as arguments); `src/i18n/*` holds en and id strings.
 
 ## Layers
 
 | Layer | Location | Contains | May import |
 |-------|----------|----------|------------|
-| Core | `src/core/` | pure measurement, quality gate, auto-lock reducer, calibration, fit, profile state, preflight, review parsing | `src/core/`, `src/data/` |
+| Core | `src/core/` | pure measurement, quality gate, auto-lock reducer, calibration, fit, profile state, preflight, review parsing | `src/core/` only (charts arrive as arguments) |
 | Data | `src/data/` | `colourboxCharts.js` (ColourBox size charts), `catalog.js` (`CATALOG`, `CUTS`) | `src/data/` |
 | Platform | `src/platform/` | `camera.js`, `pose.js`, `frameLoop.js`, `sound.js`, `storage.js`, `tilt.js` browser adapters | `src/core/`, `vendor/` |
 | App | `src/app/` | `fitApp.js`, `guidedScan.js`, `burst.js`, `scanSession.js` orchestration | core, data, platform, ui, i18n |
