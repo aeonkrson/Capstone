@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-07-PLAN.md (real-device check outstanding)
-last_updated: "2026-10-13T10:09:57.813Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-10-13T10:22:31.385Z"
 last_activity: 2026-10-04
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 24
-  completed_plans: 22
+  total_plans: 31
+  completed_plans: 23
   percent: 60
 ---
 
@@ -70,6 +70,7 @@ Progress: [████████░░] 83%
 | Phase 04 P04 | 2min | 2 tasks | 3 files |
 | Phase 04 P06 | 6min | 2 tasks | 3 files |
 | Phase 04 P07 | 12min | 2 tasks | 2 files |
+| Phase 05 P01 | 4 min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,7 @@ Recent decisions affecting current work:
 - [Phase 04]: 04-04: gate passed to stepLock is a copy { ok, code }; obs never stored
 - [Phase 04]: 04-04: start() bumps the generation so stale pending captures are dropped
 - [Phase 04]: 04-07: maybeOpenReview plays final captured cue since stopCamera drops guided late result
+- [Phase 05]: A saved review always replaces all five measurements (applyRescan); empty/rejected keys cleared
 
 ### Pending Todos
 
@@ -113,6 +115,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-10-13T10:09:57.809Z
-Stopped at: Completed 04-07-PLAN.md (real-device check outstanding)
+Last session: 2026-10-13T10:22:31.381Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
