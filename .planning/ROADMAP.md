@@ -170,13 +170,13 @@ Plans:
   4. A results table records error per measurement and per device (phone, laptop), with subjects identified by anonymous ID and photos kept out of the repository.
   5. The whole flow (consent, scan, review, verdict, history) has been run on a real iPhone, a real Android phone and a laptop over HTTPS, and a recorded fallback demo exists in case the venue fails.
 
-**Plans:** 1/7 plans executed
+**Plans:** 2/7 plans executed
 
 Plans:
 **Wave 1**
 
 - [x] 05-01-PLAN.md — Rescan: applyRescan replaces all five measurements, Scan again button, replace note (MEAS-09)
-- [ ] 05-02-PLAN.md — Study evaluator: per-measurement, per-device error table and honest GO/CONDITIONAL/NO-GO/INSUFFICIENT DATA verdict (TDD; ACC-01..03)
+- [x] 05-02-PLAN.md — Study evaluator: per-measurement, per-device error table and honest GO/CONDITIONAL/NO-GO/INSUFFICIENT DATA verdict (TDD; ACC-01..03)
 - [ ] 05-03-PLAN.md — Demo build: copy hashed vendor wasm/models into dist, npm run demo over HTTPS LAN
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -201,4 +201,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
 | 3. Measurement Engine | 5/5 | Complete (tape session outstanding) | 2026-10-13 |
 | 4. Live AR Guided Capture | 7/7 | Complete   | 2026-10-13 |
-| 5. Validation and Demo Hardening | 1/7 | In Progress|  |
+| 5. Validation and Demo Hardening | 2/7 | In Progress|  |
