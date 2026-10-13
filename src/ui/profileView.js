@@ -27,6 +27,7 @@ export function createProfileView({ doc, t, formatNumber, onSaveName, onSaveMeas
   const bodyForm = doc.getElementById("body-form");
   const bodyStatus = doc.getElementById("body-status");
   const sourcesEl = doc.getElementById("body-sources");
+  const rescanBtn = doc.getElementById("btn-rescan");
   const inputs = {};
   const errors = {};
   for (const name of FIELD_NAMES) {
@@ -114,6 +115,13 @@ export function createProfileView({ doc, t, formatNumber, onSaveName, onSaveMeas
         source: t(sourceKey(state, key)),
       });
       sourcesEl.appendChild(li);
+    }
+
+    // Scan again only makes sense once something is saved (MEAS-09).
+    if (rescanBtn) {
+      const any = MEASUREMENT_KEYS.some((key) => state.measurements[key] !== null);
+      if (any) rescanBtn.removeAttribute("hidden");
+      else rescanBtn.setAttribute("hidden", "");
     }
   }
 

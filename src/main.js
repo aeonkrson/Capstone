@@ -375,7 +375,11 @@ if (required.some((el) => !el)) {
     const wasGuided = guided.status().active;
     stopCamera();
     if (wasGuided) sound.play("captured");
-    reviewView.show({ scanned: combined.measurements, hasProfile: fitApp.hasProfile() });
+    reviewView.show({
+      scanned: combined.measurements,
+      hasProfile: fitApp.hasProfile(),
+      hasMeasurements: fitApp.hasMeasurements(),
+    });
   }
 
   // Hands-free scan: gate -> auto-lock -> burst, with sound cues (CAPT-04 to CAPT-08).
@@ -412,13 +416,41 @@ if (required.some((el) => !el)) {
   captureSideBtn?.addEventListener("click", () => { manualCapture("side"); });
   captureResetBtn?.addEventListener("click", clearCaptured);
 
-  guideRestartBtn?.addEventListener("click", () => {
+  // Drop any scan in progress or in review before a new one.
+  function resetScan() {
     captureToken += 1; // abort any countdown or burst still running
     clearCaptured();
     reviewView.hide();
+  }
+
+  function restartGuidedScan() {
     if (camera.isRunning()) guided.restart();
-    else startCamera();
+    else startCamera(); // shows consent first when not given this page load
+  }
+
+  guideRestartBtn?.addEventListener("click", () => {
+    resetScan();
+    restartGuidedScan();
   });
+
+  // Scan again (MEAS-09): consent, height, guided scan, review; saving replaces the old values.
+  function beginRescan() {
+    const scanArea = document.getElementById("scan-area");
+    if (scanArea) scanArea.open = true;
+    resetScan();
+    // Height first when none is set this page load or the height form is open.
+    if (heightCm === null || cameraSectionEl.hasAttribute("hidden")) {
+      cameraSectionEl.setAttribute("hidden", "");
+      heightForm.show();
+      heightForm.focus();
+      document.getElementById("height-section")?.scrollIntoView();
+      return;
+    }
+    cameraSectionEl.scrollIntoView();
+    restartGuidedScan();
+  }
+
+  document.getElementById("btn-rescan")?.addEventListener("click", beginRescan);
 
   manualEntryBtn?.addEventListener("click", () => {
     fitApp.showManualEntry("manual.routed");

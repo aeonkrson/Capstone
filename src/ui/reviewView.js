@@ -14,6 +14,7 @@ export function createReviewView({ doc, t, formatNumber, onSave }) {
   const nameInput = doc.getElementById("review-name");
   const nameError = doc.getElementById("review-name-error");
   const statusEl = doc.getElementById("review-status");
+  const replaceNote = doc.getElementById("review-replace-note");
   const inputs = {};
   const markers = {};
   const errors = {};
@@ -28,6 +29,9 @@ export function createReviewView({ doc, t, formatNumber, onSave }) {
   let scanned = {};
   let shown = false;
   let savedShown = false;
+  // Whether the last save replaced earlier measurements.
+  let savedReplaced = false;
+  let replacing = false;
 
   function showError(el, input, text) {
     if (el) {
@@ -68,7 +72,9 @@ export function createReviewView({ doc, t, formatNumber, onSave }) {
   }
 
   function renderStatus() {
-    if (statusEl) statusEl.textContent = savedShown ? t("review.saved") : "";
+    if (!statusEl) return;
+    if (!savedShown) statusEl.textContent = "";
+    else statusEl.textContent = t(savedReplaced ? "review.replaced" : "review.saved");
   }
 
   if (form) {
@@ -103,14 +109,21 @@ export function createReviewView({ doc, t, formatNumber, onSave }) {
         if (nameInput && typeof nameInput.focus === "function") nameInput.focus();
         return;
       }
+      savedReplaced = Boolean(result && result.replaced);
       savedShown = true;
       renderStatus();
     });
   }
 
-  function show({ scanned: next, hasProfile }) {
+  function show({ scanned: next, hasProfile, hasMeasurements = false }) {
     scanned = next && typeof next === "object" ? { ...next } : {};
     savedShown = false;
+    savedReplaced = false;
+    replacing = Boolean(hasMeasurements);
+    if (replaceNote) {
+      if (replacing) replaceNote.removeAttribute("hidden");
+      else replaceNote.setAttribute("hidden", "");
+    }
     clearAllErrors();
     renderStatus();
     for (const key of REVIEW_KEYS) {
