@@ -84,3 +84,23 @@ export function widestTorsoRun(mask, firstRow, lastRow, centerXForRow) {
   }
   return best;
 }
+
+/**
+ * The narrowest midline run over a row range. Rows are rounded and clamped; rows with no midline run
+ * are skipped; ties keep the highest row.
+ * @param {{ w: number, h: number, data: Uint8Array }} mask
+ * @param {number} firstRow
+ * @param {number} lastRow
+ * @param {(row: number) => number} centerXForRow midline column in mask pixels
+ * @returns {{ row: number, start: number, end: number, width: number } | null}
+ */
+export function narrowestTorsoRun(mask, firstRow, lastRow, centerXForRow) {
+  const first = Math.max(0, Math.min(mask.h - 1, Math.round(firstRow)));
+  const last = Math.max(0, Math.min(mask.h - 1, Math.round(lastRow)));
+  let best = null;
+  for (let row = first; row <= last; row += 1) {
+    const run = torsoRunAtRow(mask, row, centerXForRow(row));
+    if (run && (best === null || run.width < best.width)) best = { row, ...run };
+  }
+  return best;
+}
