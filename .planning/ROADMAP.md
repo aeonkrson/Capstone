@@ -111,13 +111,13 @@ Plans:
   3. Bad captures (full body not in frame, wrong distance, tilted camera, arms against the body, wrong side facing, moving) are rejected with a reason instead of producing a confident-looking number.
   4. Estimates for a team member compared with the tape protocol from Phase 1 show shoulder width and chest within the agreed starting targets, or the shortfall is recorded. Waist, torso length and arm length carry an explicit "estimate" marker for Phase 4's review screen.
 
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [x] 03-01-PLAN.md — Pure scan engine: five measurements, waist row, calibration table (TDD, wave 1)
 - [x] 03-02-PLAN.md — Capture-quality gates and device tilt adapter (TDD, wave 1)
 - [x] 03-03-PLAN.md — Profile accepts scanned values with scanned/estimate markers, fitApp.applyScan (wave 1)
-- [ ] 03-04-PLAN.md — Scan page wiring: gated burst, scan session, plain result view, Use button (wave 2)
+- [x] 03-04-PLAN.md — Scan page wiring: gated burst, scan session, plain result view, Use button (wave 2)
 - [ ] 03-05-PLAN.md — Team repeatability and tape check, fitted calibration, results record (wave 3, human checkpoint)
 
 ### Phase 4: Live AR Guided Capture
@@ -164,6 +164,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 (decimal phases, if inser
 |-------|----------------|--------|-----------|
 | 1. Foundation and Accuracy Spike | 6/8 | In Progress|  |
 | 2. Manual-Entry Fit Check | 4/4 | Complete   | 2026-10-08 |
-| 3. Measurement Engine | 3/5 | In Progress|  |
+| 3. Measurement Engine | 4/5 | In Progress|  |
 | 4. Live AR Guided Capture | 0/TBD | Not started | - |
 | 5. Validation and Demo Hardening | 0/TBD | Not started | - |

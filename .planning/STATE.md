@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-10-13T09:37:50.753Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-10-13T09:42:19.078Z"
 last_activity: 2026-10-04
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 17
-  completed_plans: 13
+  completed_plans: 14
   percent: 20
 ---
 
@@ -30,7 +30,7 @@ Plan: 6 of 8 in current phase
 Status: Ready to execute
 Last activity: 2026-10-04
 
-Progress: [████████░░] 75%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [████████░░] 75%
 | Phase 03 P01 | 5min | 1 tasks | 6 files |
 | Phase 03 P02 | 6min | 2 tasks | 4 files |
 | Phase 03 P03 | 8min | 2 tasks | 9 files |
+| Phase 03 P04 | 5min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,7 @@ Recent decisions affecting current work:
 - [Phase 01]: D-15 GreenWear code removed, no legacy folder; CSP forbids third-party scripts (PRIV-02)
 - [Phase 01]: Locale follows navigator.language; no switcher or storage in Phase 1
 - [Phase 03]: Phase 3 measurements live in src/core/scan.js on top of frozen measureView; one CALIBRATION table with priors (shoulder +2.0 cm) until 03-05 fits tape data
+- [Phase 03]: A rejected scan view shows one reason (dominant per-frame code, or moving); user re-captures only that view (P3-D17) — Plan 03-04
 
 ### Pending Todos
 
@@ -99,6 +101,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-10-13T09:37:50.749Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-10-13T09:42:11.209Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
