@@ -16,3 +16,12 @@ validation/**/*.gif
 validation/**/*.mp4
 validation/**/*.mov
 validation/**/*.webm
+
+# Body photos and demo videos never enter git (PNG and GIF stay limited to validation/ so UI icons are not blocked)
+recordings/
+*.heic
+*.mp4
+*.mov
+*.webm
+*.jpg
+*.jpeg
