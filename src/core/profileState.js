@@ -8,16 +8,23 @@ const TEXT_MAX = 80;
 const STATE_VERSION = 1;
 
 // State key -> BODY_FIELDS key
-const FIELD_MAP = { chestCm: "chest", shoulderCm: "shoulder", torsoCm: "torso" };
+const FIELD_MAP = {
+  chestCm: "chest", shoulderCm: "shoulder", torsoCm: "torso", waistCm: "waist", armCm: "arm",
+};
 const FIELD_KEYS = Object.keys(FIELD_MAP);
+
+/** Scanned keys shown with an estimate marker (same list as src/core/scan.js). */
+export const ESTIMATE_KEYS = ["waistCm", "torsoCm", "armCm"];
+/** Every measurement key the profile can hold. */
+export const MEASUREMENT_KEYS = ["chestCm", "shoulderCm", "torsoCm", "waistCm", "armCm"];
 const HISTORY_FIELDS = ["garmentId", "garmentName", "size", "preference", "verdict", "at"];
 
 export function emptyState() {
   return {
     version: STATE_VERSION,
     profile: null,
-    measurements: { chestCm: null, shoulderCm: null, torsoCm: null },
-    sources: { chestCm: null, shoulderCm: null, torsoCm: null },
+    measurements: { chestCm: null, shoulderCm: null, torsoCm: null, waistCm: null, armCm: null },
+    sources: { chestCm: null, shoulderCm: null, torsoCm: null, waistCm: null, armCm: null },
     preference: "regular",
     history: [],
   };
@@ -66,7 +73,7 @@ export function setProfileName(state, name) {
 /**
  * Set one measurement. Out-of-range or unknown fields leave the state unchanged.
  * @param {object} state - current state
- * @param {"chestCm" | "shoulderCm" | "torsoCm"} key - field
+ * @param {"chestCm" | "shoulderCm" | "torsoCm" | "waistCm" | "armCm"} key - field
  * @param {number} cm - value in cm
  * @returns {object} new state
  */
@@ -76,6 +83,32 @@ export function setMeasurement(state, key, cm) {
   next.sources[key] = state.measurements[key] === null ? "typed" : "edited";
   next.measurements[key] = cm;
   return next;
+}
+
+/**
+ * Write scan results into the profile. A scan is a fresh reading: it replaces old values.
+ * Null, non-finite and out-of-range values are rejected and leave the old value.
+ * @param {object} state - current state
+ * @param {object} measurements - { shoulderCm, chestCm, waistCm, torsoCm, armCm } numbers or null
+ * @returns {{ state: object, applied: string[], rejected: string[] }} new state and key lists
+ */
+export function applyScan(state, measurements) {
+  const next = cloneState(state);
+  const applied = [];
+  const rejected = [];
+  const input = isObject(measurements) ? measurements : {};
+  for (const key of MEASUREMENT_KEYS) {
+    const raw = own(input, key) ? input[key] : null;
+    const cm = typeof raw === "number" && Number.isFinite(raw) ? Math.round(raw * 10) / 10 : raw;
+    if (inRange(key, cm)) {
+      next.measurements[key] = cm;
+      next.sources[key] = "scanned";
+      applied.push(key);
+    } else {
+      rejected.push(key);
+    }
+  }
+  return { state: next, applied, rejected };
 }
 
 /**
@@ -121,7 +154,7 @@ export function sanitiseState(raw) {
   for (const key of FIELD_KEYS) {
     if (own(measurements, key) && inRange(key, measurements[key])) {
       out.measurements[key] = measurements[key];
-      out.sources[key] = sources[key] === "edited" ? "edited" : "typed";
+      out.sources[key] = sources[key] === "edited" || sources[key] === "scanned" ? sources[key] : "typed";
     }
   }
 

@@ -4,11 +4,13 @@ export const BODY_FIELDS = {
   chest: { min: 60, max: 160 }, // cm, body bust circumference
   shoulder: { min: 25, max: 60 }, // cm, body shoulder width
   torso: { min: 30, max: 70 }, // cm, neck base to hip bone
+  waist: { min: 50, max: 150 }, // cm, body waist circumference (scan only)
+  arm: { min: 40, max: 85 }, // cm, shoulder to wrist (scan only)
 };
 
 /**
  * Validate a typed body measurement. One comma is read as a decimal point.
- * @param {"chest" | "shoulder" | "torso"} key - which field is being validated
+ * @param {"chest" | "shoulder" | "torso" | "waist" | "arm"} key - which field is being validated
  * @param {string} input - raw text from the field
  * @returns {{ ok: true, cm: number } | { ok: false, code: "empty" | "not-a-number" | "too-low" | "too-high" }}
  */
