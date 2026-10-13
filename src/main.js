@@ -16,6 +16,8 @@ import { createSound } from "./platform/sound.js";
 import { createConsentView } from "./ui/consentView.js";
 import { createReviewView } from "./ui/reviewView.js";
 import { createGuideView } from "./ui/guideView.js";
+import { preflightIssues } from "./core/preflight.js";
+import { frameRateFps } from "./core/frameRate.js";
 
 const locale = initLocale(storage.loadLocale() ?? navigator.language);
 document.documentElement.lang = locale;
@@ -32,6 +34,23 @@ const flags = {
   delegate: params.get("delegate") === "gpu" ? "GPU" : "CPU",
 };
 const facingMode = flags.camera === "rear" ? "environment" : "user";
+
+// Startup check (D-09): explain up front when this address or browser cannot scan.
+// Informational only; consent, camera start and manual entry still work as before.
+const preflightEl = document.getElementById("preflight-status");
+const preflightCodes = preflightIssues({
+  secureContext: window.isSecureContext === true,
+  cameraApi: typeof navigator.mediaDevices?.getUserMedia === "function",
+  webAssembly: typeof WebAssembly === "object",
+});
+
+function renderPreflight() {
+  if (!preflightEl || preflightCodes.length === 0) return;
+  preflightEl.textContent = [...preflightCodes.map((code) => t("preflight." + code)), t("preflight.manual")].join(" ");
+  preflightEl.removeAttribute("hidden");
+}
+renderPreflight();
+document.getElementById("language-select")?.addEventListener("change", renderPreflight);
 
 const heightSectionEl = document.getElementById("height-section");
 const heightFormEl = document.getElementById("height-form");
@@ -180,6 +199,10 @@ if (required.some((el) => !el)) {
     }
   }
 
+  // Recent frame times for the debug fps readout (D-10), last 30 only.
+  const FPS_WINDOW = 30;
+  const frameTimes = [];
+
   const frameLoop = createFrameLoop({
     videoEl: webcamElement,
     onFrame(timestampMs) {
@@ -203,6 +226,8 @@ if (required.some((el) => !el)) {
       }
       setStatus(obs ? t("camera.status.detected") : t("camera.status.searching"));
       if (flags.debug) {
+        frameTimes.push(timestampMs);
+        if (frameTimes.length > FPS_WINDOW) frameTimes.shift();
         debugView.setEngineInfo({
           model: pose.info.variant,
           delegate: pose.info.delegate,
@@ -210,6 +235,7 @@ if (required.some((el) => !el)) {
           "inference ms": Math.round(inferenceMs),
           frame: obs ? obs.image.w + " x " + obs.image.h : "none",
           mask: obs && obs.mask ? obs.mask.w + " x " + obs.mask.h : "none",
+          fps: frameRateFps(frameTimes) ?? "n/a",
         });
       }
     },
@@ -285,6 +311,7 @@ if (required.some((el) => !el)) {
     guided.stop();
     guideView.clear();
     frameLoop.stop();
+    frameTimes.length = 0;
     camera.stop();
     tilt.stop();
     tiltStarted = false;
