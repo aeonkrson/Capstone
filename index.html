@@ -34,6 +34,7 @@
 
     <!-- Profile (PROF-01) -->
     <section id="profile-section">
+      <p id="manual-route-status" role="alert" hidden></p>
       <h2 data-i18n="profile.title"></h2>
       <p data-i18n="profile.intro"></p>
       <form id="profile-form" novalidate>
@@ -134,6 +135,16 @@
       </form>
     </section>
 
+    <!-- Camera consent (PRIV-01) -->
+    <section id="consent-section" hidden>
+      <h2 data-i18n="consent.title"></h2>
+      <p data-i18n="consent.use"></p>
+      <p data-i18n="consent.saved"></p>
+      <p data-i18n="consent.sound"></p>
+      <button type="button" id="btn-consent-accept" data-i18n="consent.accept"></button>
+      <button type="button" id="btn-consent-decline" data-i18n="consent.decline"></button>
+    </section>
+
     <!-- Camera -->
     <section id="camera-section" hidden>
       <div class="camera-panel">
@@ -155,6 +166,7 @@
           <p id="camera-error-message"></p>
           <div class="cover-actions">
             <button class="btn btn-primary" id="btn-camera-retry" data-i18n="camera.retry"></button>
+            <button class="btn btn-secondary" id="btn-manual-entry" data-i18n="manual.go"></button>
           </div>
         </div>
 
@@ -168,6 +180,12 @@
         </div>
       </div>
 
+      <!-- Pose guide hint (CAPT-02, CAPT-03) -->
+      <section id="guide-area">
+        <p id="guide-hint" role="status" aria-live="polite"></p>
+        <button type="button" id="btn-guide-restart" data-i18n="guide.restart"></button>
+      </section>
+
       <!-- Current height and privacy note -->
       <div class="camera-meta" id="camera-meta">
         <span id="height-current"></span>
@@ -175,21 +193,63 @@
         <p class="privacy-note" data-i18n="camera.privacy-note"></p>
       </div>
 
-      <!-- Front and side capture with results (MEAS-01 to MEAS-05) -->
+      <!-- Manual front and side capture fallback (MEAS-01 to MEAS-05) -->
       <section id="scan-capture">
         <h3 data-i18n="scan.capture.title"></h3>
         <p data-i18n="scan.capture.intro"></p>
+        <p data-i18n="scan.manual.note"></p>
         <button class="btn btn-primary" id="btn-capture-front" data-i18n="debug.capture.front"></button>
         <button class="btn btn-primary" id="btn-capture-side" data-i18n="debug.capture.side"></button>
         <button class="btn btn-secondary" id="btn-capture-reset" data-i18n="debug.capture.reset"></button>
         <p id="capture-status" role="status"></p>
         <p id="scan-front-status"></p>
         <p id="scan-side-status"></p>
-        <h3 data-i18n="scan.result.title"></h3>
-        <ul id="scan-results"></ul>
-        <button type="button" id="btn-scan-use" data-i18n="scan.use" disabled></button>
-        <p id="scan-use-status" role="status"></p>
       </section>
+    </section>
+
+    <!-- Review scanned measurements (MEAS-06) -->
+    <section id="review-section" hidden>
+      <h2 data-i18n="review.title"></h2>
+      <p data-i18n="review.intro"></p>
+      <form id="review-form" novalidate>
+        <p id="review-name-row" hidden>
+          <label for="review-name" data-i18n="review.name.label"></label>
+          <input id="review-name" type="text" maxlength="40" autocomplete="off" aria-describedby="review-name-error">
+          <span id="review-name-error" role="alert" hidden></span>
+        </p>
+        <p>
+          <label for="review-shoulder" data-i18n="body.shoulder.label"></label>
+          <input id="review-shoulder" name="shoulder" type="text" inputmode="decimal" autocomplete="off" aria-describedby="review-shoulder-marker review-shoulder-error">
+          <span id="review-shoulder-marker"></span>
+          <span id="review-shoulder-error" role="alert" hidden></span>
+        </p>
+        <p>
+          <label for="review-chest" data-i18n="body.chest.label"></label>
+          <input id="review-chest" name="chest" type="text" inputmode="decimal" autocomplete="off" aria-describedby="review-chest-marker review-chest-error">
+          <span id="review-chest-marker"></span>
+          <span id="review-chest-error" role="alert" hidden></span>
+        </p>
+        <p>
+          <label for="review-waist" data-i18n="body.waist.label"></label>
+          <input id="review-waist" name="waist" type="text" inputmode="decimal" autocomplete="off" aria-describedby="review-waist-marker review-waist-error">
+          <span id="review-waist-marker"></span>
+          <span id="review-waist-error" role="alert" hidden></span>
+        </p>
+        <p>
+          <label for="review-torso" data-i18n="body.torso.label"></label>
+          <input id="review-torso" name="torso" type="text" inputmode="decimal" autocomplete="off" aria-describedby="review-torso-marker review-torso-error">
+          <span id="review-torso-marker"></span>
+          <span id="review-torso-error" role="alert" hidden></span>
+        </p>
+        <p>
+          <label for="review-arm" data-i18n="body.arm.label"></label>
+          <input id="review-arm" name="arm" type="text" inputmode="decimal" autocomplete="off" aria-describedby="review-arm-marker review-arm-error">
+          <span id="review-arm-marker"></span>
+          <span id="review-arm-error" role="alert" hidden></span>
+        </p>
+        <button type="submit" data-i18n="review.save"></button>
+      </form>
+      <p id="review-status" role="status"></p>
     </section>
 
     <!-- Debug view -->
